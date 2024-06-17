@@ -4,7 +4,7 @@ const Project = require('../models/project.model');
 const Criteria = require('../models/criteria.model');
 const mongoose = require('mongoose');
 
-exports.getAllProjects = factory.getAll(Criteria);
+exports.getAllProjects = factory.getAll(Project);
 
 exports.createFullProject = async (req, res) => {
   try {
