@@ -11,7 +11,8 @@ const ScoreSchema = new Schema({
     type: Number,
     required: true,
     min: 0,
-    max: 10
+    max: 10,
+    default: 0
   }
 });
 
@@ -20,10 +21,7 @@ const JureSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
-  name: {
-    type: String,
-    required: true
-  },
+
   scores: [ScoreSchema]
 });
 

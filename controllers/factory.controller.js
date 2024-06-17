@@ -55,9 +55,11 @@ exports.getOne = (Model, populateOptions) =>
     });
   });
 
-exports.getAll = Model =>
+exports.getAll = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
-    const document = await Model.find();
+    let query = Model.find();
+    if (populateOptions) query.populate(populateOptions);
+    const document = await query;
     res.json({
       status: 'success',
       results: document.length,
