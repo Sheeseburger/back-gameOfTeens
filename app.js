@@ -42,4 +42,4 @@ app.use('/lifeCheck', (req, res, next) => {
 app.all('*', (req, res, next) => {
   next(`Can't find ${req.originalUrl} on this server :#`, 404);
 });
-module.exports = api;
+module.exports = app;
