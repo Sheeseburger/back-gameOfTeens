@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config({path: './config.env'});
-
+import serverless from 'serverless-http';
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -42,5 +42,4 @@ app.use('/lifeCheck', (req, res, next) => {
 app.all('*', (req, res, next) => {
   next(`Can't find ${req.originalUrl} on this server :#`, 404);
 });
-
-module.exports = app;
+module.exports = serverless(api);
