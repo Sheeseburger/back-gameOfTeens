@@ -8,7 +8,7 @@ exports.getAllProjects = factory.getAll(Project);
 
 exports.createFullProject = async (req, res) => {
   try {
-    //    {name, project_link, video_link, criteria, judges}
+    //    {name, project_link, video_link, criteria, jures}
     const newProject = await Project.create(req.body);
     res.status(201).json(newProject);
   } catch (err) {
@@ -16,17 +16,17 @@ exports.createFullProject = async (req, res) => {
   }
 };
 
-exports.addJudgeToProject = async (req, res) => {
+exports.addJureToProject = async (req, res) => {
   try {
     const {projectId} = req.params.id;
-    const {judgeId, name, scores} = req.body;
+    const {jureId, name, scores} = req.body;
 
     const project = await Project.findById(projectId);
     if (!project) {
       next(new AppError(`No document find with id ${req.params.id}`, 404));
     }
 
-    project.judges.push({judgeId: mongoose.Types.ObjectId(judgeId), name, scores});
+    project.jures.push({jureId: mongoose.Types.ObjectId(jureId), name, scores});
     await project.save();
 
     res.status(200).json(project);

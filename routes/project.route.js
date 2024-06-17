@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.use(authController.protect);
 router.route('/').get(projectController.getAllProjects).post(projectController.createFullProject);
-router.post('/:id/judges', projectController.addJudgeToProject);
+router.post('/:id/jures', projectController.addJureToProject);
 
 // router.route('/').post(userController.createUser, authController.forgotPassword);
 

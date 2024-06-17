@@ -15,8 +15,8 @@ const ScoreSchema = new Schema({
   }
 });
 
-const JudgeSchema = new Schema({
-  judgeId: {
+const JureSchema = new Schema({
+  jureId: {
     type: Schema.Types.ObjectId,
     required: true
   },
@@ -51,7 +51,7 @@ const ProjectSchema = new Schema({
       required: true
     }
   ],
-  judges: [JudgeSchema]
+  jures: [JureSchema]
 });
 
 const Project = mongoose.model('Project', ProjectSchema);
