@@ -1,6 +1,8 @@
 const dotenv = require('dotenv');
 dotenv.config({path: './config.env'});
-
+require('./models/criteria.model');
+require('./models/project.model');
+require('./models/user.model');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');

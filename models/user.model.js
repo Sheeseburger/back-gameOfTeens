@@ -1,5 +1,3 @@
-const crypto = require('crypto');
-
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
@@ -16,9 +14,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: [validator.isEmail, 'Email is not correct']
   },
-  photo: {
-    type: String
-  },
+
   role: {
     type: String,
     enum: ['admin', 'jury'],
@@ -67,16 +63,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
     return JWTTimestamp < changedTimestamp;
   }
-};
-
-userSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString('hex');
-
-  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-  console.log({resetToken}, this.passwordResetToken);
-
-  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);

@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment-timezone');
 const {promisify} = require('util');
+
 const sendEmail = require('../utils/email');
 const catchAsync = require('../utils/catchAsync');
+const User = require('../models/user.model');
 
 const timeLeftTillMorning = () => {
   const nowInKiev = moment().tz('Europe/Kiev');
@@ -11,21 +13,16 @@ const timeLeftTillMorning = () => {
   return expiryTime.diff(nowInKiev, 'seconds');
 };
 
-const signToken = (user, timeTillMorning) => {
+const signToken = user => {
   return jwt.sign(
-    {id: user.id, user_name: user.name, role: user.Role.name, roleId: user.Role.id},
-    process.env.JWT_SECRET,
-    {
-      expiresIn: timeTillMorning
-    }
+    {id: user._id, name: user.name, roleName: user.role, role: user.role === 'admin' ? 1 : 0},
+    process.env.JWT_SECRET
   );
 };
 
 const createSendToken = (user, statusCode, res) => {
-  const timeTillMorning = timeLeftTillMorning();
-  const token = signToken(user, timeTillMorning);
+  const token = signToken(user);
   const cookieOptions = {
-    expires: new Date(Date.now() + timeTillMorning),
     httpOnly: true
   };
   res.cookie('jwt', token, cookieOptions);
@@ -37,22 +34,19 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.verifyUser = async (email, password) => {
-  const user = await User.findOne({
-    where: {email}
-  });
-
-  if (!user || !(await user.verifyPassword(password))) return false;
-  return user;
-};
-
 exports.login = catchAsync(async (req, res) => {
   const {email, password} = req.body;
-  const verify = await this.verifyUser(email, password);
-  if (!verify) {
-    return res.status(401).json({message: 'Invalid credentials'});
+
+  if (!email || !password) {
+    return next(new AppError('Please provide email and/or password'), 400);
   }
-  createSendToken(verify, 200, res);
+
+  const user = await User.findOne({email}).select('+password');
+
+  if (!user || !(await user.correctPassword(password, user.password))) {
+    return next(new AppError('Incorrect email or password'), 401);
+  }
+  createSendToken(user, 200, res);
 });
 
 exports.logout = (req, res) => {
