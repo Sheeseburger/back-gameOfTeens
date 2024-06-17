@@ -73,7 +73,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       return next('You are not logged in bro :(');
     }
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    const freshUser = await User.findByPk(decoded.id, {});
+    const freshUser = await User.findById(decoded.id, {});
 
     if (!freshUser) return next('This user was deleted');
 
@@ -102,7 +102,7 @@ exports.allowedTo = roles => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // req.user.email came from creating user
   // generate random reset token
-  const email = req?.User?.email || req.body.email;
+  const email = req.body.email;
   const resetToken = jwt.sign({email}, process.env.JWT_SECRET, {
     expiresIn: '1d'
   });

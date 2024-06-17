@@ -44,6 +44,13 @@ const ProjectSchema = new Schema({
     type: String,
     required: true
   },
+  criteria: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Criteria',
+      required: true
+    }
+  ],
   judges: [JudgeSchema]
 });
 
