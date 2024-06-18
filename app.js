@@ -4,7 +4,7 @@ dotenv.config({path: './config.env'});
 require('./models/criteria.model');
 require('./models/project.model');
 require('./models/user.model');
-
+require('./models/course.model');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -14,7 +14,7 @@ const authRoutes = require('./routes/auth.route');
 const userRoutes = require('./routes/user.route');
 const criteriaRoutes = require('./routes/criteria.route');
 const projectRoutes = require('./routes/project.route');
-
+const courseRoutes = require('./routes/course.route');
 const app = express();
 //development loging
 // if (process.env.NODE_ENV === 'development') {
@@ -43,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/criterias', criteriaRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/courses', courseRoutes);
 
 app.use('/lifeCheck', (req, res, next) => {
   res.status(200).json({message: 'I am alive'});
