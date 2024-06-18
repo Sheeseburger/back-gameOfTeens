@@ -21,7 +21,11 @@ const JureSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
-
+  comment: {
+    type: String,
+    required: false,
+    default: ''
+  },
   scores: [ScoreSchema]
 });
 
@@ -42,7 +46,12 @@ const ProjectSchema = new Schema({
     type: String,
     required: true
   },
-  criteria: [
+  course: {
+    type: Schema.Types.ObjectId,
+    ref: 'Course',
+    required: true
+  },
+  criterias: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Criteria',

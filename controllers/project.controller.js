@@ -1,12 +1,10 @@
-const factory = require('./factory.controller');
-
-const Project = require('../models/project.model');
-const Criteria = require('../models/criteria.model');
 const mongoose = require('mongoose');
-const catchAsync = require('../utils/catchAsync');
-const ObjectId = mongoose.Types.ObjectId;
 
-exports.getAllProjects = factory.getAll(Project, {path: 'criteria'});
+const factory = require('./factory.controller');
+const Project = require('../models/project.model');
+const catchAsync = require('../utils/catchAsync');
+
+exports.getAllProjects = factory.getAll(Project, [{path: 'course'}, {path: 'criterias'}]);
 
 exports.createFullProject = catchAsync(async (req, res) => {
   const {name, description, project_link, video_link, criteria, jures} = req.body;
