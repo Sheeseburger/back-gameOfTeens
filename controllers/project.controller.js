@@ -75,7 +75,7 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
     }
   });
   // Add or update the comment
-  jury.comment = comment;
+  if (comment) jury.comment = comment;
 
   // Save the project with the updated jury information
   await project.save();
