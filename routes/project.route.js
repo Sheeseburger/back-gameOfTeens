@@ -7,8 +7,10 @@ const router = express.Router();
 
 router.use(authController.protect);
 router.route('/').get(projectController.getAllProjects).post(projectController.createFullProject);
-router.post('/:id/jures', projectController.addJureToProject);
+router.route('/:id').get(projectController.getProjectById);
 
+router.post('/:id/jures', projectController.addJureToProject);
+router.patch('/:projectId/jures/:juryId', projectController.patchJuryDecision);
 // router.route('/').post(userController.createUser, authController.forgotPassword);
 
 // router.route('/:id').delete(userController.deleteUser);

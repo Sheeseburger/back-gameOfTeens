@@ -1,6 +1,16 @@
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 
+const multiplePopulate = (query, populateOptions) => {
+  if (Array.isArray(populateOptions)) {
+    populateOptions.forEach(option => {
+      query = query.populate(option);
+    });
+  } else {
+    query = query.populate(populateOptions);
+  }
+  return query;
+};
 exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
     const document = await Model.findByIdAndDelete(req.params.id);
@@ -40,8 +50,8 @@ exports.createOne = Model =>
 
 exports.getOne = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id);
-    if (populateOptions) query.populate(populateOptions);
+    let query = Model.findById(req.params.id).select('-__v');
+    if (populateOptions) query = multiplePopulate(query, populateOptions);
     const document = await query;
     if (!document) {
       next(new AppError(`No document find with id ${req.params.id}`, 404));
@@ -60,13 +70,7 @@ exports.getAll = (Model, populateOptions) =>
     let query = Model.find().select('-__v');
 
     if (populateOptions) {
-      if (Array.isArray(populateOptions)) {
-        populateOptions.forEach(option => {
-          query = query.populate(option);
-        });
-      } else {
-        query = query.populate(populateOptions);
-      }
+      query = multiplePopulate(query, populateOptions);
     }
 
     const document = await query;
