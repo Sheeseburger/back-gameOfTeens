@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.use(authController.protect);
 router.route('/').get(projectController.getAllProjects).post(projectController.createFullProject);
-router.route('/:id').get(projectController.getProjectById);
+router.route('/:courseId').get(projectController.getAllProjects);
 
 router.post('/:id/jures', projectController.addJureToProject);
 router.patch('/:projectId/jures/:juryId', projectController.patchJuryDecision);

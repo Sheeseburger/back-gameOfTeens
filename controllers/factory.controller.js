@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 
@@ -65,13 +67,14 @@ exports.getOne = (Model, populateOptions) =>
     });
   });
 
-exports.getAll = (Model, populateOptions) =>
+exports.getAll = (Model, populateOptions, where) =>
   catchAsync(async (req, res, next) => {
-    let query = Model.find().select('-__v');
-
+    const course = req.params.courseId;
+    let query = Model.find();
     if (populateOptions) {
       query = multiplePopulate(query, populateOptions);
     }
+    if (course) query = query.where('course').equals(mongoose.Types.ObjectId(course));
 
     const document = await query;
     res.json({
