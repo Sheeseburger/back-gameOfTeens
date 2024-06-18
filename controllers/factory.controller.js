@@ -57,7 +57,7 @@ exports.getOne = (Model, populateOptions) =>
 
 exports.getAll = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
-    let query = Model.find();
+    let query = Model.find().select('-__v');
     if (populateOptions) query.populate(populateOptions);
     const document = await query;
     res.json({
