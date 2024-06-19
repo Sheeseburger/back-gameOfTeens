@@ -5,10 +5,40 @@ const Project = require("../models/project.model");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 
-exports.getAllProjects = factory.getAll(Project, [
-    { path: "course" },
-    { path: "criterias" },
-]);
+exports.getAllProjects = exports.getAllProjects = catchAsync(
+    async (req, res, next) => {
+        const course = req.params.courseId;
+        let query = Project.find();
+
+        query = factory.multiplePopulate(query, [
+            { path: "course" },
+            { path: "criterias" },
+        ]);
+        if (course)
+            query = query
+                .where("course")
+                .equals(mongoose.Types.ObjectId(course));
+        console.log(req.user._id);
+        if (req.user.role === "admin") {
+            // For admin: filter projects where all juries are confirmed
+            query = query.where("jures").elemMatch({ confirmed: true });
+        } else {
+            // For non-admin: filter projects where the user is a jury and is not confirmed
+            query = query.where("jures").elemMatch({
+                jureId: req.user._id,
+                // confirmed: false,
+            });
+        }
+        const document = await query;
+        res.json({
+            status: "success",
+            results: document.length,
+            data: {
+                data: document,
+            },
+        });
+    }
+);
 
 exports.getProjectById = factory.getOne(Project, [
     { path: "course" },
@@ -84,13 +114,15 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
             )
         );
     }
-
-    jury.scores.forEach((score) => {
-        const newScore = scores[score.criteria.toString()];
-        if (newScore !== undefined) {
-            score.score = newScore;
+    scores.forEach((incomingScore) => {
+        const existingScore = jury.scores.find(
+            (s) => s.criteria.toString() === incomingScore.criteria
+        );
+        if (existingScore) {
+            existingScore.score = incomingScore.score;
         }
     });
+
     // Add or update the comment
     if (comment) jury.comment = comment;
 
