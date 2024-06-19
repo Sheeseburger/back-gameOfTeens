@@ -96,7 +96,7 @@ exports.addJureToProject = async (req, res) => {
 
 exports.patchJuryDecision = catchAsync(async (req, res, next) => {
     const { projectId } = req.params;
-    const { scores, comment, jureId } = req.body;
+    const { scores, comment, jureId, project_link, video_link } = req.body;
     console.log(projectId, jureId);
     const project = await Project.findById(projectId);
 
@@ -125,7 +125,8 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
 
     // Add or update the comment
     if (comment) jury.comment = comment;
-
+    project.project_link = project_link;
+    project.video_link = video_link;
     // Save the project with the updated jury information
     await project.save();
 
