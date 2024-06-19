@@ -5,7 +5,7 @@ const {promisify} = require('util');
 const sendEmail = require('../utils/email');
 const catchAsync = require('../utils/catchAsync');
 const User = require('../models/user.model');
-
+const AppError = require('../utils/AppError');
 const timeLeftTillMorning = () => {
   const nowInKiev = moment().tz('Europe/Kiev');
   const expiryTime = nowInKiev.clone().add(1, 'days').startOf('day').hour(8);
@@ -34,7 +34,7 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.login = catchAsync(async (req, res) => {
+exports.login = catchAsync(async (req, res, next) => {
   const {email, password} = req.body;
 
   if (!email || !password) {
