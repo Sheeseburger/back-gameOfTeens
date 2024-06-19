@@ -15,7 +15,20 @@ exports.getAllProjects = catchAsync(async (req, res, next) => {
 
     // Execute the aggregation pipeline
     const documents = await Project.aggregate(pipeline);
-
+    await Project.populate(documents, [
+      {path: 'criterias'},
+      {path: 'jures.jureId', select: '-email -role'}
+    ]);
+    documents.forEach(doc => {
+      doc.jures.forEach(jure => {
+        if (jure.jureId) {
+          // Flatten the jureId structure
+          jure.name = jure.jureId.name; // Add name as a separate field
+          jure.jureId = jure.jureId._id.toString(); // Convert ObjectId to string
+          delete jure.jureId.name; // Remove name from jureId if needed
+        }
+      });
+    });
     return res.json({
       status: 'success',
       results: documents.length,
