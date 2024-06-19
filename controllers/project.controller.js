@@ -4,114 +4,44 @@ const factory = require('./factory.controller');
 const Project = require('../models/project.model');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const {buildAdminAggregationPipeline} = require('../utils/projectUtils');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
-  let matchStage = {};
 
-  // Build the match stage based on user role and course
   if (req.user.role === 'admin') {
-    // For admin: filter projects where all juries are confirmed
-    matchStage = {
-      jures: {$not: {$elemMatch: {confirmed: false}}}
-    };
+    // Build the aggregation pipeline for admin users
+    const pipeline = buildAdminAggregationPipeline(course);
+
+    // Execute the aggregation pipeline
+    const documents = await Project.aggregate(pipeline);
+
+    return res.json({
+      status: 'success',
+      results: documents.length,
+      data: {
+        data: documents
+      }
+    });
   } else {
-    // For non-admin: filter projects where the user is a jury and is not confirmed
-    matchStage = {
-      'jures.jureId': mongoose.Types.ObjectId(req.user._id),
-      'jures.confirmed': false
-    };
+    let query = Project.find();
+    // Build the match stage for non-admin users
+    query = factory.multiplePopulate(query, [{path: 'course'}, {path: 'criterias'}]);
+    if (course) query = query.where('course').equals(mongoose.Types.ObjectId(course));
+    query = query.where('jures').elemMatch({
+      jureId: req.user._id,
+      confirmed: false
+    });
+    const documents = await query;
+
+    return res.json({
+      status: 'success',
+      results: documents.length,
+      data: {
+        data: documents
+      }
+    });
   }
-
-  if (course) {
-    matchStage.course = mongoose.Types.ObjectId(course);
-  }
-
-  // Build the aggregation pipeline
-  const pipeline = [
-    {$match: matchStage},
-    {
-      $lookup: {
-        from: 'courses', // Make sure the collection names are correct
-        localField: 'course',
-        foreignField: '_id',
-        as: 'course'
-      }
-    },
-    {$unwind: '$course'},
-    {
-      $lookup: {
-        from: 'criterias',
-        localField: 'criterias',
-        foreignField: '_id',
-        as: 'criterias'
-      }
-    },
-    {$unwind: '$jures'},
-    {$unwind: '$jures.scores'},
-    {
-      $group: {
-        _id: {
-          projectId: '$_id',
-          criteriaId: '$jures.scores.criteria'
-        },
-        avgScore: {$avg: '$jures.scores.score'},
-        totalScore: {$sum: '$jures.scores.score'},
-        count: {$sum: 1}
-      }
-    },
-    {
-      $group: {
-        _id: '$_id.projectId',
-        avgScores: {
-          $push: {
-            criteria: '$_id.criteriaId',
-            avgScore: '$avgScore'
-          }
-        },
-        totalAvgScore: {$avg: '$avgScore'}
-      }
-    },
-    {
-      $lookup: {
-        from: 'projects',
-        localField: '_id',
-        foreignField: '_id',
-        as: 'project'
-      }
-    },
-    {$unwind: '$project'},
-    {
-      $addFields: {
-        'project.avgScores': {
-          $arrayToObject: {
-            $map: {
-              input: '$avgScores',
-              as: 'item',
-              in: {k: {$toString: '$$item.criteria'}, v: '$$item.avgScore'}
-            }
-          }
-        },
-        'project.totalAvgScore': '$totalAvgScore'
-      }
-    },
-    {
-      $replaceRoot: {
-        newRoot: '$project'
-      }
-    }
-  ];
-
-  // Execute the aggregation pipeline
-  const documents = await Project.aggregate(pipeline);
-
-  res.json({
-    status: 'success',
-    results: documents.length,
-    data: {
-      data: documents
-    }
-  });
 });
 exports.getProjectById = factory.getOne(Project, [{path: 'course'}, {path: 'criterias'}]);
 
