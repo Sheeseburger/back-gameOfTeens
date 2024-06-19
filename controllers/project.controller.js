@@ -5,43 +5,122 @@ const Project = require('../models/project.model');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
-exports.getAllProjects = exports.getAllProjects = catchAsync(async (req, res, next) => {
+exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
-  let query = Project.find();
+  let matchStage = {};
 
-  query = factory.multiplePopulate(query, [{path: 'course'}, {path: 'criterias'}]);
-  if (course) query = query.where('course').equals(mongoose.Types.ObjectId(course));
-  console.log(req.user._id);
+  // Build the match stage based on user role and course
   if (req.user.role === 'admin') {
     // For admin: filter projects where all juries are confirmed
-    query = query.where({
+    matchStage = {
       jures: {$not: {$elemMatch: {confirmed: false}}}
-    });
+    };
   } else {
     // For non-admin: filter projects where the user is a jury and is not confirmed
-    query = query.where('jures').elemMatch({
-      jureId: req.user._id,
-      confirmed: false
-    });
+    matchStage = {
+      'jures.jureId': mongoose.Types.ObjectId(req.user._id),
+      'jures.confirmed': false
+    };
   }
-  const document = await query;
+
+  if (course) {
+    matchStage.course = mongoose.Types.ObjectId(course);
+  }
+
+  // Build the aggregation pipeline
+  const pipeline = [
+    {$match: matchStage},
+    {
+      $lookup: {
+        from: 'courses', // Make sure the collection names are correct
+        localField: 'course',
+        foreignField: '_id',
+        as: 'course'
+      }
+    },
+    {$unwind: '$course'},
+    {
+      $lookup: {
+        from: 'criterias',
+        localField: 'criterias',
+        foreignField: '_id',
+        as: 'criterias'
+      }
+    },
+    {$unwind: '$jures'},
+    {$unwind: '$jures.scores'},
+    {
+      $group: {
+        _id: {
+          projectId: '$_id',
+          criteriaId: '$jures.scores.criteria'
+        },
+        avgScore: {$avg: '$jures.scores.score'},
+        totalScore: {$sum: '$jures.scores.score'},
+        count: {$sum: 1}
+      }
+    },
+    {
+      $group: {
+        _id: '$_id.projectId',
+        avgScores: {
+          $push: {
+            criteria: '$_id.criteriaId',
+            avgScore: '$avgScore'
+          }
+        },
+        totalAvgScore: {$avg: '$avgScore'}
+      }
+    },
+    {
+      $lookup: {
+        from: 'projects',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'project'
+      }
+    },
+    {$unwind: '$project'},
+    {
+      $addFields: {
+        'project.avgScores': {
+          $arrayToObject: {
+            $map: {
+              input: '$avgScores',
+              as: 'item',
+              in: {k: {$toString: '$$item.criteria'}, v: '$$item.avgScore'}
+            }
+          }
+        },
+        'project.totalAvgScore': '$totalAvgScore'
+      }
+    },
+    {
+      $replaceRoot: {
+        newRoot: '$project'
+      }
+    }
+  ];
+
+  // Execute the aggregation pipeline
+  const documents = await Project.aggregate(pipeline);
+
   res.json({
     status: 'success',
-    results: document.length,
+    results: documents.length,
     data: {
-      data: document
+      data: documents
     }
   });
 });
-
 exports.getProjectById = factory.getOne(Project, [{path: 'course'}, {path: 'criterias'}]);
 
 exports.createFullProject = catchAsync(async (req, res) => {
-  const {name, description, project_link, video_link, criteria, jures} = req.body;
+  const {name, description, project_link, video_link, criterias, jures, course} = req.body;
 
   const juresWithScores = jures.map(jure => ({
     jureId: jure,
-    scores: criteria.map(criteriaId => ({
+    scores: criterias.map(criteriaId => ({
       criteria: criteriaId,
       score: 0 // Default score, adjust as needed
     }))
@@ -53,7 +132,8 @@ exports.createFullProject = catchAsync(async (req, res) => {
     description,
     project_link,
     video_link,
-    criteria,
+    criterias,
+    course,
     jures: juresWithScores
   });
   res.status(201).json(newProject);
