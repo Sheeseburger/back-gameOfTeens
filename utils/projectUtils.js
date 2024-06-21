@@ -4,9 +4,9 @@ const buildAdminAggregationPipeline = courseId => {
   let matchStage = {};
 
   // Build the match stage based on the course
-  matchStage = {
-    jures: {$not: {$elemMatch: {confirmed: false}}}
-  };
+  // matchStage = {
+  //   jures: {$not: {$elemMatch: {confirmed: false}}}
+  // };
 
   if (courseId) {
     matchStage.course = mongoose.Types.ObjectId(courseId);
