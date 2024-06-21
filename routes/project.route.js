@@ -10,7 +10,7 @@ router.route('/').get(projectController.getAllProjects).post(projectController.c
 router.route('/:courseId').get(projectController.getAllProjects);
 
 router.post('/:id/jures', projectController.addJureToProject);
-router.patch('/confirm', projectController.confirmJureDecision);
+router.post('/confirm', projectController.confirmJureDecision);
 router.patch('/:projectId', projectController.patchJuryDecision);
 // router.route('/').post(userController.createUser, authController.forgotPassword);
 
