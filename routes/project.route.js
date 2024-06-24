@@ -10,8 +10,8 @@ router.route('/').get(projectController.getAllProjects).post(projectController.c
 router.route('/:courseId').get(projectController.getAllProjects);
 
 router.post('/:id/jures', projectController.addJureToProject);
+router.post('/confirm', projectController.confirmJureDecision);
 router.patch('/:projectId', projectController.patchJuryDecision);
-router.patch('/:projectId/confirm', projectController.confirmJureDecision);
 // router.route('/').post(userController.createUser, authController.forgotPassword);
 
 // router.route('/:id').delete(userController.deleteUser);

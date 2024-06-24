@@ -155,27 +155,30 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
 });
 
 exports.confirmJureDecision = catchAsync(async (req, res, next) => {
-  const {projectId} = req.params;
   const jureId = req.user._id;
-  const project = await Project.findById(projectId);
 
-  if (!project) {
-    return next(new AppError('No project found with that ID', 404));
-  }
-  // Find the specific jury entry in the project's jures array
-  const jury = project.jures.find(j => j.jureId.toString() === jureId.toString());
-
-  if (!jury) {
-    return next(new AppError('No jury found with that ID for the specified project', 404));
-  }
-  jury.confirmed = true;
-  // Save the project with the updated jury information
-  await project.save();
+  const projects = req.body.projects;
+  const newProjects = await Promise.all(projects.map(async projectBody => {
+    const project = await Project.findById(projectBody._id);
+    if (!project) {
+      throw new AppError('No project found with that ID', 404);
+    }
+    // Find the specific jury entry in the project's jures array
+    const jury = project.jures.find(j => j.jureId.toString() === jureId.toString());
+  
+    if (!jury) {
+      throw new AppError('No jury found with that ID for the specified project', 404);
+    }
+    jury.confirmed = true;
+    // Save the project with the updated jury information
+    await project.save();
+    return project;
+  }));
 
   res.status(200).json({
     status: 'success',
     data: {
-      project
+      newProjects
     }
   });
 });
