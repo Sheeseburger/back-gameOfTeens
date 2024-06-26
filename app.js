@@ -5,6 +5,7 @@ require('./models/criteria.model');
 require('./models/project.model');
 require('./models/user.model');
 require('./models/course.model');
+const scrapper = require('./utils/scrapper');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -51,4 +52,5 @@ app.use('/lifeCheck', (req, res, next) => {
 app.all('*', (req, res, next) => {
   next(`Can't find ${req.originalUrl} on this server :#`, 404);
 });
+scrapper();
 module.exports = app;

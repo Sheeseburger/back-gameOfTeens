@@ -38,16 +38,18 @@ const JureSchema = new Schema({
 const ProjectSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: false
   },
-
+  links: {
+    type: Array
+  },
   project_link: {
     type: String,
-    required: true
+    required: false
   },
   video_link: {
     type: String,
-    required: true
+    required: false
   },
   course: {
     type: Schema.Types.ObjectId,
