@@ -1,4 +1,4 @@
-const data = require('../output (2).json');
+// const data = require('../test2.json');
 const Project = require('../models/project.model');
 jureIds = ['667bdb8e6776f7e936d7f09e', '667bdb826776f7e936d7f09b', '667bdb716776f7e936d7f098'];
 // criterias = [
@@ -22,13 +22,15 @@ const criterias = [
 const scrapper = () => {
   console.log(data);
   let count = 0;
-  const group = data.groups[2];
-  // data.groups.forEach(group => {
-  group.students.forEach(async student => {
-    //  (student.courses[0].modules[0].homework.attacheFileLinks[0] != '') {
-    console.log(student.fullName, group.id, group.name);
-    console.log(student.courses[0].modules[0].homework.attacheFileLinks);
-    count += 1;
+  // const group = data.groups[];
+  data.groups.forEach((group, index) => {
+    if (index === 2)
+      group.students.forEach(async student => {
+        if (student.courses[0].modules[0].homework.attacheFileLinks[0] != '')
+          // console.log(student.fullName, group.id, group.name);
+          // console.log(student.courses[0].modules[0].homework.attacheFileLinks);
+          count += 1;
+      });
     // const newProject = new Project({
     //   name: student.fullName,
     //   links: student.courses[0].modules[0].homework.attacheFileLinks,

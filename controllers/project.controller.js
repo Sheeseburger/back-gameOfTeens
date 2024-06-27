@@ -58,8 +58,21 @@ exports.getAllProjects = catchAsync(async (req, res, next) => {
 });
 exports.getProjectById = factory.getOne(Project, [{path: 'course'}, {path: 'criterias'}]);
 
+exports.getProjectsWithLinks = async (req, res, next) => {
+  const all = await Project.find({
+    links: {
+      $elemMatch: {
+        $ne: ''
+      }
+    }
+  }).populate('course');
+  let str = '';
+  all.forEach(project => (str += `${project.name},${project.course.name}\n`));
+  console.log(str);
+  res.status(200).json({length: all.length, all, str});
+};
 exports.createFullProject = catchAsync(async (req, res) => {
-  const {name, description, project_link, video_link, criterias, jures, course} = req.body;
+  const {name, description, links, project_link, video_link, criterias, jures, course} = req.body;
 
   const juresWithScores = jures.map(jure => ({
     jureId: jure,
@@ -76,6 +89,7 @@ exports.createFullProject = catchAsync(async (req, res) => {
     project_link,
     video_link,
     criterias,
+    links,
     course,
     jures: juresWithScores
   });
@@ -158,22 +172,24 @@ exports.confirmJureDecision = catchAsync(async (req, res, next) => {
   const jureId = req.user._id;
 
   const projects = req.body.projects;
-  const newProjects = await Promise.all(projects.map(async projectBody => {
-    const project = await Project.findById(projectBody._id);
-    if (!project) {
-      throw new AppError('No project found with that ID', 404);
-    }
-    // Find the specific jury entry in the project's jures array
-    const jury = project.jures.find(j => j.jureId.toString() === jureId.toString());
-  
-    if (!jury) {
-      throw new AppError('No jury found with that ID for the specified project', 404);
-    }
-    jury.confirmed = true;
-    // Save the project with the updated jury information
-    await project.save();
-    return project;
-  }));
+  const newProjects = await Promise.all(
+    projects.map(async projectBody => {
+      const project = await Project.findById(projectBody._id);
+      if (!project) {
+        throw new AppError('No project found with that ID', 404);
+      }
+      // Find the specific jury entry in the project's jures array
+      const jury = project.jures.find(j => j.jureId.toString() === jureId.toString());
+
+      if (!jury) {
+        throw new AppError('No jury found with that ID for the specified project', 404);
+      }
+      jury.confirmed = true;
+      // Save the project with the updated jury information
+      await project.save();
+      return project;
+    })
+  );
 
   res.status(200).json({
     status: 'success',
