@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+const {google} = require('googleapis');
+const loginToSheet = require('../utils/sheets/loginToSheet');
+const createSheetData = require('../utils/sheets/formDataToSheet');
+
 const factory = require('./factory.controller');
 const Project = require('../models/project.model');
 const catchAsync = require('../utils/catchAsync');
@@ -198,3 +202,60 @@ exports.confirmJureDecision = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+exports.fillSpreadsheet = async (req, res, next) => {
+  const sheets = loginToSheet();
+  const spreadsheetId = process.env.SPREADSHEETID;
+
+  const projects = await Project.find()
+    .populate('course')
+    .populate('criterias')
+    .populate({
+      path: 'jures',
+      populate: {
+        path: 'scores.criteria'
+      }
+    });
+
+  const scratchProjects = projects.filter(project => project.course.name === 'Scratch');
+  const minecraftKidsProjects = projects.filter(
+    project => project.course.name === 'Minecraft kids'
+  );
+  const minecraftJuniorProjects = projects.filter(
+    project => project.course.name === 'Minecraft junior'
+  );
+
+  const scratchData = createSheetData(scratchProjects);
+  const minecraftKidsData = createSheetData(minecraftKidsProjects);
+  const minecraftJuniorData = createSheetData(minecraftJuniorProjects);
+
+  // Обновляем данные в таблице
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Scratch!A1',
+    valueInputOption: 'RAW',
+    resource: {
+      values: scratchData
+    }
+  });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Minecraft kids!A1',
+    valueInputOption: 'RAW',
+    resource: {
+      values: minecraftKidsData
+    }
+  });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Minecraft junior!A1',
+    valueInputOption: 'RAW',
+    resource: {
+      values: minecraftJuniorData
+    }
+  });
+
+  res.send('Data successfully exported to Google Sheets');
+};
