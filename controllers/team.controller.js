@@ -17,7 +17,10 @@ exports.createTeam = async (req, res, next) => {
 exports.invitePlayer = async (req, res, next) => {
   const teamId = req.params.teamId;
   const playerId = req.body.playerId;
-
+  const playerAsLeader = await Team.findOne({leader: playerId});
+  if (playerAsLeader) {
+    res.status(400).json({message: 'Sorry, this player is already team leader'});
+  }
   const existingInvitation = await Invitation.findOne({
     team: teamId,
     player: playerId,
