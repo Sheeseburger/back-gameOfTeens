@@ -15,7 +15,12 @@ const timeLeftTillMorning = () => {
 
 const signToken = user => {
   return jwt.sign(
-    {id: user._id, name: user.name, roleName: user.role, role: user.role === 'admin' ? 1 : 0},
+    {
+      id: user._id,
+      name: user.name,
+      roleName: user.role,
+      role: user.role === 'admin' ? 1 : user.role === 'jury' ? 0 : 2
+    },
     process.env.JWT_SECRET
   );
 };
