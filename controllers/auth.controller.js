@@ -19,7 +19,8 @@ const signToken = user => {
       id: user._id,
       name: user.name,
       roleName: user.role,
-      role: user.role === 'admin' ? 1 : user.role === 'jury' ? 0 : 2
+      role: user.role === 'admin' ? 1 : user.role === 'jury' ? 0 : 2,
+      subscribedTo: user.role === 'player' ? user.subscribedTo : null
     },
     process.env.JWT_SECRET
   );

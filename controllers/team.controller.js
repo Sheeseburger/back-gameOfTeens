@@ -2,19 +2,19 @@ const factory = require('./factory.controller');
 
 const Team = require('../models/team.model');
 const Invitation = require('../models/invintation.model');
-
+const catchAsync = require('../utils/catchAsync');
 exports.getAllTeams = factory.getAll(Team);
 
-exports.createTeam = async (req, res, next) => {
+exports.createTeam = catchAsync(async (req, res, next) => {
   const {leader, marathon} = req.body;
 
   const team = new Team({leader, marathon, members: [leader]});
   await team.save();
 
   res.status(201).json({message: 'Team created successfully.', team});
-};
+});
 
-exports.invitePlayer = async (req, res, next) => {
+exports.invitePlayer = catchAsync(async (req, res, next) => {
   const teamId = req.params.teamId;
   const playerId = req.body.playerId;
   const playerAsLeader = await Team.findOne({leader: playerId});
@@ -33,9 +33,9 @@ exports.invitePlayer = async (req, res, next) => {
   await invitation.save();
 
   res.status(200).json({message: 'Invitation sent successfully.', invitation});
-};
+});
 
-exports.removePlayer = async (req, res, next) => {
+exports.removePlayer = catchAsync(async (req, res, next) => {
   const teamId = req.params.teamId;
   const playerId = req.body.playerId;
 
@@ -45,9 +45,9 @@ exports.removePlayer = async (req, res, next) => {
   await team.save();
 
   res.status(200).json({message: 'Player removed from team successfully.', team});
-};
+});
 
-exports.destroyTeam = async (req, res, next) => {
+exports.destroyTeam = catchAsync(async (req, res, next) => {
   const teamId = req.params.teamId;
   const team = await Team.findById(teamId);
   if (team.leader !== req.user._id) {
@@ -55,8 +55,8 @@ exports.destroyTeam = async (req, res, next) => {
   }
   await team.remove();
   res.status(200).json({message: 'Team deleted successfully.'});
-};
-exports.acceptInvite = async (req, res, next) => {
+});
+exports.acceptInvite = catchAsync(async (req, res, next) => {
   const teamId = req.params.teamId;
   const playerId = req.body.playerId;
   const invintationId = req.body.invintationId;
@@ -72,9 +72,9 @@ exports.acceptInvite = async (req, res, next) => {
   await team.save();
 
   res.status(200).json({message: 'Invitation accepted successfully.', team});
-};
+});
 
-exports.declineInvite = async (req, res, next) => {
+exports.declineInvite = catchAsync(async (req, res, next) => {
   const teamId = req.params.teamId;
   const playerId = req.body.playerId;
 
@@ -92,4 +92,4 @@ exports.declineInvite = async (req, res, next) => {
     console.error('Error declining invitation:', error);
     res.status(500).json({message: 'Internal server error.'});
   }
-};
+});
