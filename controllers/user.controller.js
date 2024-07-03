@@ -10,6 +10,29 @@ exports.getUserById = factory.getOne(User);
 
 exports.deleteUser = factory.deleteOne(User);
 
+exports.subscribeUserToMarathon = async (req, res, next) => {
+  const userId = req.params.id;
+  const marathonId = req.params.marathonId;
+
+  const user = await User.findById(userId);
+  user.subscribedTo.push(marathonId);
+
+  await user.save();
+
+  res.status(200).json({message: 'User subscribed to marathon successfully.', user});
+};
+exports.unSubscribeUserToMarathon = async (req, res, next) => {
+  const userId = req.params.id;
+  const marathonId = req.params.marathonId;
+
+  const user = await User.findById(userId);
+  user.subscribedTo = user.subscribedTo.filter(sub => sub.toString() !== marathonId);
+
+  await user.save();
+
+  res.status(200).json({message: 'User unsubscribed from marathon successfully.', user});
+};
+
 exports.createUser = catchAsync(async (req, res, next) => {
   const body = req.body;
   body.password = body.email.split('@')[0];

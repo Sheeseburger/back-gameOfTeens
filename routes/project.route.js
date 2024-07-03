@@ -8,6 +8,7 @@ router
   .route('/excel')
   .get(projectController.getProjectsWithLinks)
   .post(projectController.fillSpreadsheet);
+router.route('/excel/allProjects').post(projectController.AllProjectsToSheet);
 
 router.use(authController.protect);
 router.route('/').get(projectController.getAllProjects).post(projectController.createFullProject);

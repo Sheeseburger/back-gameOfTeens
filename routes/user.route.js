@@ -15,4 +15,9 @@ router.route('/').post(userController.createUser);
 
 router.route('/:id').delete(userController.deleteUser);
 
+router
+  .route('/:id/subscribe/:marathonId')
+  .post(userController.subscribeUserToMarathon)
+  .delete(userController.unSubscribeUserToMarathon);
+
 module.exports = router;

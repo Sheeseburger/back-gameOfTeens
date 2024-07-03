@@ -48,7 +48,15 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   createSendToken(user, 200, res);
 });
-
+exports.register = catchAsync(async (req, res, next) => {
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    role: req.body.role
+  });
+  createSendToken(newUser, 201, res);
+});
 exports.logout = (req, res) => {
   try {
     res.clearCookie('jwt');
@@ -89,13 +97,10 @@ exports.mySelfOrAdmin = catchAsync(async (req, res, next) => {
 });
 exports.allowedTo = roles => {
   return (req, res, next) => {
-    if (req.headers.mic) next(); // case for ManagersIC from another booking
-    else {
-      if (!roles.includes(req.user.Role.name)) {
-        return next('You dont have permision :(');
-      }
-      next();
+    if (!roles.includes(req.user.role)) {
+      return next('You dont have permision :(');
     }
+    next();
   };
 };
 

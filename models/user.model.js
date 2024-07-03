@@ -17,9 +17,10 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ['admin', 'jury'],
+    enum: ['admin', 'jury', 'player'],
     default: 'jury'
   },
+  subscribedTo: [{type: mongoose.Schema.Types.ObjectId, ref: 'Marathon'}],
   password: {
     type: String,
     required: true,

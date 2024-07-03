@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-const {google} = require('googleapis');
 const loginToSheet = require('../utils/sheets/loginToSheet');
 const createSheetData = require('../utils/sheets/formDataToSheet');
 
@@ -9,6 +8,7 @@ const Project = require('../models/project.model');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const {buildAdminAggregationPipeline} = require('../utils/projectUtils');
+const fillAllProjects = require('../utils/sheets/ProjectsToSheet');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
@@ -202,6 +202,22 @@ exports.confirmJureDecision = catchAsync(async (req, res, next) => {
     }
   });
 });
+exports.AllProjectsToSheet = async (req, res, next) => {
+  const sheets = loginToSheet();
+  const spreadsheetId = process.env.SPREADSHEETID;
+
+  const projects = await Project.find().populate('course');
+  const data = fillAllProjects(projects);
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Projects!A1',
+    valueInputOption: 'RAW',
+    resource: {
+      values: data
+    }
+  });
+  res.json({message: 'filled'});
+};
 
 exports.fillSpreadsheet = async (req, res, next) => {
   const sheets = loginToSheet();

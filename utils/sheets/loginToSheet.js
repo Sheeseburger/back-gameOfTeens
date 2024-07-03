@@ -1,3 +1,5 @@
+const {google} = require('googleapis');
+
 const loginToSheet = () => {
   const auth = new google.auth.GoogleAuth({
     credentials: {

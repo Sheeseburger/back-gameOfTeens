@@ -16,6 +16,8 @@ const userRoutes = require('./routes/user.route');
 const criteriaRoutes = require('./routes/criteria.route');
 const projectRoutes = require('./routes/project.route');
 const courseRoutes = require('./routes/course.route');
+const marathonRoutes = require('./routes/marathon.route');
+
 const app = express();
 //development loging
 // if (process.env.NODE_ENV === 'development') {
@@ -45,6 +47,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/criterias', criteriaRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/marathon', marathonRoutes);
 
 app.use('/lifeCheck', (req, res, next) => {
   res.status(200).json({message: 'I am alive'});
