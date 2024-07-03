@@ -2,7 +2,7 @@ const factory = require('./factory.controller');
 
 const Marathon = require('../models/marathon.model');
 
-exports.getAllMarathons = factory.getAll(Marathon);
+exports.getAllMarathons = factory.getAll(Marathon, [{path: 'course'}]);
 
 exports.createMarathon = factory.createOne(Marathon);
 
