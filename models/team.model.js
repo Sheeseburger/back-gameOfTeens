@@ -23,14 +23,14 @@ function autoPopulateUsers(next) {
   next();
 }
 TeamSchema.post('save', async function (doc, next) {
-  await doc.populate('leader members').execPopulate();
+  await doc.populate('leader members');
   next();
 });
 
 // Middleware для автоматичного populate після оновлення документа
 TeamSchema.post('findOneAndUpdate', async function (doc, next) {
   if (doc) {
-    await doc.populate('leader members').execPopulate();
+    await doc.populate('leader members');
   }
   next();
 });

@@ -1,6 +1,6 @@
 const factory = require('./factory.controller');
 const User = require('../models/user.model');
-
+const Invintation = require('../models/invintation.model');
 const sendEmail = require('../utils/email');
 const catchAsync = require('../utils/catchAsync');
 
@@ -48,4 +48,12 @@ exports.createUser = catchAsync(async (req, res, next) => {
     status: 'success',
     data: document
   });
+});
+
+exports.myInvites = catchAsync(async (req, res, next) => {
+  const playerId = req.user._id;
+
+  const invites = Invintation.find({player: playerId}).populate('team');
+  const doc = await invites;
+  res.status(200).json({status: 'success', data: doc});
 });

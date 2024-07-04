@@ -12,6 +12,7 @@ router.route('/:id').delete(teamController.destroyTeam);
 
 router
   .route('/:id/invite')
+  .get(teamController.getAllInvites)
   .post(teamController.invitePlayer)
   .patch(teamController.acceptInvite)
   .delete(teamController.declineInvite);

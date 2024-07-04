@@ -11,6 +11,11 @@ const InvitationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
+    },
+    marathon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Marathon',
+      required: true
     }
   },
   {timestamps: true}
