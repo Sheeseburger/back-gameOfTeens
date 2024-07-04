@@ -8,7 +8,7 @@ router.use(authController.protect);
 
 router.route('/').get(teamController.getAllTeams).post(teamController.createTeam);
 
-router.route('/:id').get(teamController.getTeamById).delete(teamController.destroyTeam);
+router.route('/:id').delete(teamController.destroyTeam);
 
 router
   .route('/:id/invite')

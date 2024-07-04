@@ -15,16 +15,15 @@ exports.createTeam = catchAsync(async (req, res, next) => {
 });
 
 exports.invitePlayer = catchAsync(async (req, res, next) => {
-  const teamId = req.params.teamId;
+  const teamId = req.params.id;
   const playerId = req.body.playerId;
   const playerAsLeader = await Team.findOne({leader: playerId});
   if (playerAsLeader) {
-    res.status(400).json({message: 'Sorry, this player is already team leader'});
+    res.status(400).json({message: 'Sorry, this player is already a team leader'});
   }
   const existingInvitation = await Invitation.findOne({
     team: teamId,
-    player: playerId,
-    status: 'pending'
+    player: playerId
   });
   if (existingInvitation) {
     return res.status(400).json({message: 'Invitation already sent to this player.'});
