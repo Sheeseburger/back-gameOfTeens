@@ -6,7 +6,8 @@ const BlockProjectSchema = new mongoose.Schema({
     required: false
   },
   files: {
-    type: Array
+    type: Array,
+    required: false
   },
   links: {
     type: String,
