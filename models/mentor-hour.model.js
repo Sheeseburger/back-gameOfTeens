@@ -4,12 +4,12 @@ const mentorHourSchema = new mongoose.Schema(
   {
     course: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'course',
+      ref: 'Course',
       required: true
     },
     block: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'marathon.blocks'
+      ref: 'Marathon.Blocks'
     },
     title: {
       type: String,
