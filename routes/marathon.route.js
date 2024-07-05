@@ -15,4 +15,12 @@ router.route('/').post(marathonController.createMarathon);
 
 router.route('/:id').delete(marathonController.deleteMarathon);
 router.route('/:id/block').post(marathonController.addBlockToMarathon);
+router
+  .route('/:id/block/:blockId')
+  .get(marathonController.getProjectFromBlockById)
+  .post(marathonController.createMarathon);
+router
+  .route('/:id/block/:blockId/project/:projectId')
+  .get(marathonController.getProjectFromBlockById)
+  .patch(marathonController.updateBlockProject);
 module.exports = router;

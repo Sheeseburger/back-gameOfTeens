@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+const BlockProjectSchema = new Schema({
+  name: {
+    type: String,
+    required: false
+  },
+  files: {
+    type: Array
+  },
+  links: {
+    type: String,
+    required: false
+  },
+  team: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Team',
+    required: true
+  }
+});
+
 const BlockSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -9,7 +28,8 @@ const BlockSchema = new mongoose.Schema({
   description: {
     type: String,
     required: false
-  }
+  },
+  projects: [BlockProjectSchema]
 });
 
 const MarathonModel = new mongoose.Schema({

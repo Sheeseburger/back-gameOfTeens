@@ -1,6 +1,7 @@
 const factory = require('./factory.controller');
 
 const Marathon = require('../models/marathon.model');
+const catchAsync = require('../utils/catchAsync');
 
 exports.getAllMarathons = factory.getAll(Marathon, [{path: 'course'}]);
 
@@ -31,3 +32,72 @@ exports.addBlockToMarathon = async (req, res, next) => {
 exports.getMarathonById = factory.getOne(Marathon);
 
 exports.deleteMarathon = factory.deleteOne(Marathon);
+
+exports.getProjectsFromBlock = catchAsync(async (req, res) => {
+  const {marathonId, blockId} = req.params;
+  const marathon = await Marathon.findById(marathonId).populate('course');
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  res.status(200).json(block.projects);
+});
+exports.createProjectToBlock = catchAsync(async (req, res) => {
+  const {marathonId, blockId} = req.params;
+  const newProject = req.body;
+
+  const marathon = await Marathon.findById(marathonId).populate('course');
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  block.projects.push(newProject);
+  await marathon.save();
+
+  res.status(201).json(block.projects);
+});
+exports.updateBlockProject = catchAsync(async (req, res) => {
+  const {marathonId, blockId, projectId} = req.params;
+  const updatedProject = req.body;
+
+  const marathon = await Marathon.findById(marathonId).populate('course');
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.id(projectId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+
+  project.set(updatedProject);
+  await marathon.save();
+
+  res.status(200).json(project);
+});
+
+exports.getProjectFromBlockById = catchAsync(async (req, res) => {
+  const {marathonId, blockId, projectId} = req.params;
+
+  const marathon = await Marathon.findById(marathonId).populate('course');
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.id(projectId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+
+  res.status(200).json(project);
+});
