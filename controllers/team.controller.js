@@ -18,7 +18,7 @@ exports.invitePlayer = catchAsync(async (req, res, next) => {
   const teamId = req.params.id;
   const playerId = req.body.playerId;
   const marathonId = req.body.marathonId;
-  const playerAsLeader = await Team.findOne({leader: playerId});
+  const playerAsLeader = await Team.findOne({leader: playerId, marathon: marathonId});
   if (playerAsLeader) {
     res.status(400).json({message: 'Sorry, this player is already a team leader'});
   }
