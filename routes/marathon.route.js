@@ -10,11 +10,6 @@ router.route('/').get(marathonController.getAllMarathons);
 
 router.get('/:id', marathonController.getMarathonById);
 
-router.use(authController.allowedTo('admin'));
-router.route('/').post(marathonController.createMarathon);
-
-router.route('/:id').delete(marathonController.deleteMarathon);
-router.route('/:id/block').post(marathonController.addBlockToMarathon);
 router
   .route('/:id/block/:blockId')
   .get(marathonController.getProjectFromBlockById)
@@ -27,4 +22,10 @@ router
   .route('/:id/block/:blockId/project/:projectId')
   .get(marathonController.getProjectFromBlockById)
   .patch(marathonController.updateBlockProject);
+
+router.use(authController.allowedTo('admin'));
+
+router.route('/:id/block').post(marathonController.addBlockToMarathon);
+router.route('/:id').delete(marathonController.deleteMarathon);
+router.route('/').post(marathonController.createMarathon);
 module.exports = router;
