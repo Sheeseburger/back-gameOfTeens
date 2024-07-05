@@ -19,6 +19,10 @@ router
   .route('/:id/block/:blockId')
   .get(marathonController.getProjectFromBlockById)
   .post(marathonController.createMarathon);
+
+router
+  .route('/:id/block/:blockId/team/:teamId')
+  .get(marathonController.getProjectFromBlockByTeamId);
 router
   .route('/:id/block/:blockId/project/:projectId')
   .get(marathonController.getProjectFromBlockById)

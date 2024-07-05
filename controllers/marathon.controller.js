@@ -101,3 +101,22 @@ exports.getProjectFromBlockById = catchAsync(async (req, res) => {
 
   res.status(200).json(project);
 });
+
+exports.getProjectFromBlockByTeamId = catchAsync(async (req, res) => {
+  const {marathonId, blockId, teamId} = req.params;
+
+  const marathon = await Marathon.findById(marathonId).populate('course');
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.find(proj => proj.team.toString() === teamId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+
+  res.status(200).json(project);
+});
