@@ -59,7 +59,7 @@ exports.createProjectToBlock = catchAsync(async (req, res) => {
   block.projects.push(newProject);
   await marathon.save();
 
-  res.status(201).json(block.projects);
+  res.status(201).json({data: block.projects});
 });
 exports.updateBlockProject = catchAsync(async (req, res) => {
   const marathonId = req.params.id;

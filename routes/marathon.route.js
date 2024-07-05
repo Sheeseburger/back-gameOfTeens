@@ -10,10 +10,8 @@ router.route('/').get(marathonController.getAllMarathons);
 
 router.get('/:id', marathonController.getMarathonById);
 
-router
-  .route('/:id/block/:blockId')
-  .get(marathonController.getProjectFromBlockById)
-  .post(marathonController.createMarathon);
+router.route('/:id/block/:blockId/projects').post(marathonController.createProjectToBlock);
+router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
 
 router
   .route('/:id/block/:blockId/team/:teamId')
