@@ -10,17 +10,17 @@ router.route('/').get(marathonController.getAllMarathons);
 
 router.get('/:id', marathonController.getMarathonById);
 
-router.route('/:id/block/:blockId/projects').post(marathonController.createProjectToBlock);
-router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
-
 router
   .route('/:id/block/:blockId/team/:teamId')
   .get(marathonController.getProjectFromBlockByTeamId);
+
 router
-  .route('/:id/block/:blockId/project/:projectId')
+  .route('/:id/block/:blockId/projects/:projectId')
   .get(marathonController.getProjectFromBlockById)
   .patch(marathonController.updateBlockProject);
+router.route('/:id/block/:blockId/projects').post(marathonController.createProjectToBlock);
 
+router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
 router.use(authController.allowedTo('admin'));
 
 router.route('/:id/block').post(marathonController.addBlockToMarathon);

@@ -10,7 +10,7 @@ const BlockProjectSchema = new mongoose.Schema({
     required: false
   },
   links: {
-    type: String,
+    type: Array,
     required: false
   },
   team: {
