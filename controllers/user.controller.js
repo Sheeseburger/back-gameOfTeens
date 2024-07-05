@@ -52,8 +52,8 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
 exports.myInvites = catchAsync(async (req, res, next) => {
   const playerId = req.user._id;
-
-  const invites = Invintation.find({player: playerId}).populate('team');
+  const marathon = req.params.marathonId;
+  const invites = Invintation.find({player: playerId, marathon}).populate('team');
   const doc = await invites;
   res.status(200).json({status: 'success', data: doc});
 });

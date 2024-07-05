@@ -8,7 +8,7 @@ const router = express.Router();
 router.route('/').get(userController.getAllUsers);
 
 router.use(authController.protect);
-router.route('/myInvites').get(userController.myInvites);
+router.route('/myInvites/:marathonId').get(userController.myInvites);
 
 router.get('/:id', userController.getUserById);
 

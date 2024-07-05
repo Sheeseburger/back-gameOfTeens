@@ -1,5 +1,5 @@
 const factory = require('./factory.controller');
-
+const mongoose = require('mongoose');
 const Team = require('../models/team.model');
 const Invitation = require('../models/invintation.model');
 const catchAsync = require('../utils/catchAsync');
@@ -67,11 +67,16 @@ exports.destroyTeam = catchAsync(async (req, res, next) => {
 });
 exports.acceptInvite = catchAsync(async (req, res, next) => {
   const teamId = req.params.id;
-  const playerId = req.user._id;
+  const playerId = req.body.playerId;
   const marathon = req.body.marathon;
   const result = await Invitation.deleteMany({
-    player: playerId,
-    marathon: marathon
+    player: mongoose.Types.ObjectId(playerId),
+    marathon: mongoose.Types.ObjectId(marathon)
+  });
+  console.log(result);
+  console.log({
+    player: mongoose.Types.ObjectId(playerId),
+    marathon: mongoose.Types.ObjectId(marathon)
   });
   const team = await Team.findById(teamId);
   team.members.push(playerId);
