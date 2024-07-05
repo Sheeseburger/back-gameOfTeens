@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const User = require('../models/user.model');
+const mentorHour = require('../models/mentor-hour.model');
 
 exports.multiplePopulate = (query, populateOptions) => {
   if (Array.isArray(populateOptions)) {
@@ -68,7 +69,7 @@ exports.getOne = (Model, populateOptions) =>
     });
   });
 
-exports.getAll = (Model, populateOptions, where) =>
+exports.getAll = (Model, populateOptions, customCondition) =>
   catchAsync(async (req, res, next) => {
     const course = req.params.courseId;
     let query = Model.find();
@@ -87,7 +88,9 @@ exports.getAll = (Model, populateOptions, where) =>
       if (Model === User) query.where('subscribedTo').in([mongoose.Types.ObjectId(marathonId)]);
       else query = query.where('marathon').equals(mongoose.Types.ObjectId(marathonId));
     }
-
+    if (Model === mentorHour) {
+      query = query.where('marathon').in(req.user.subscribedTo);
+    }
     query = query.sort('-createdAt'); // Default sort if none provided
 
     const document = await query;

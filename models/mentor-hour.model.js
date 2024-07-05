@@ -7,6 +7,10 @@ const mentorHourSchema = new mongoose.Schema(
       ref: 'Course',
       required: true
     },
+    marathon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Marathon'
+    },
     block: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Marathon.Blocks'

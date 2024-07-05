@@ -2,7 +2,7 @@ const factory = require('./factory.controller');
 
 const MentorHour = require('../models/mentor-hour.model');
 
-exports.getAllMentorHours = factory.getAll(MentorHour, [{path: 'course'}]);
+exports.getAllMentorHours = factory.getAll(MentorHour, [{path: 'course'}, {path: 'marathon'}]);
 
 exports.createMentorHour = factory.createOne(MentorHour);
 
