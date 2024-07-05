@@ -18,6 +18,8 @@ const projectRoutes = require('./routes/project.route');
 const courseRoutes = require('./routes/course.route');
 const marathonRoutes = require('./routes/marathon.route');
 const teamRoutes = require('./routes/team.route');
+const mentorHoursRoutes = require('./routes/mentor-hour.route');
+
 const app = express();
 //development loging
 // if (process.env.NODE_ENV === 'development') {
@@ -49,7 +51,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/marathon', marathonRoutes);
 app.use('/api/teams', teamRoutes);
-
+app.use('/api/mentorHours', mentorHoursRoutes);
 app.use('/lifeCheck', (req, res, next) => {
   res.status(200).json({message: 'I am alive'});
 });

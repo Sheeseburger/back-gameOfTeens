@@ -88,6 +88,8 @@ exports.getAll = (Model, populateOptions, where) =>
       else query = query.where('marathon').equals(mongoose.Types.ObjectId(marathonId));
     }
 
+    query = query.sort('-createdAt'); // Default sort if none provided
+
     const document = await query;
     res.json({
       status: 'success',
