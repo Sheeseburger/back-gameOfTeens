@@ -21,7 +21,7 @@ router
 router.route('/:id/block/:blockId/projects').post(marathonController.createProjectToBlock);
 
 router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
-router.use(authController.allowedTo('admin'));
+router.use(authController.allowedTo(['admin', 'mentor']));
 
 router.route('/:id/block').post(marathonController.addBlockToMarathon);
 router.route('/:id').delete(marathonController.deleteMarathon);

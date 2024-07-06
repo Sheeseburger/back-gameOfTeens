@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ['admin', 'jury', 'player'],
+    enum: ['admin', 'jury', 'player', 'mentor'],
     default: 'jury'
   },
   subscribedTo: [{type: mongoose.Schema.Types.ObjectId, ref: 'Marathon'}],
