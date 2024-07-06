@@ -76,17 +76,17 @@ exports.getAll = (Model, populateOptions, customCondition) =>
     if (populateOptions) {
       query = this.multiplePopulate(query, populateOptions);
     }
-    if (course) query = query.where('course').equals(mongoose.Types.ObjectId(course));
+    if (course) query = query.where('course').equals(new mongoose.Types.ObjectId(course));
 
     const memberId = req.query.memberId;
     const marathonId = req.query.marathonId;
     if (memberId) {
-      query = query.where('members').in([mongoose.Types.ObjectId(memberId)]);
+      query = query.where('members').in([new mongoose.Types.ObjectId(memberId)]);
     }
 
     if (marathonId) {
-      if (Model === User) query.where('subscribedTo').in([mongoose.Types.ObjectId(marathonId)]);
-      else query = query.where('marathon').equals(mongoose.Types.ObjectId(marathonId));
+      if (Model === User) query.where('subscribedTo').in([new mongoose.Types.ObjectId(marathonId)]);
+      else query = query.where('marathon').equals(new mongoose.Types.ObjectId(marathonId));
     }
     if (Model === mentorHour) {
       query = query.where('marathon').in(req.user.subscribedTo);

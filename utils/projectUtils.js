@@ -9,7 +9,7 @@ const buildAdminAggregationPipeline = courseId => {
   // };
 
   if (courseId) {
-    matchStage.course = mongoose.Types.ObjectId(courseId);
+    matchStage.course = new mongoose.Types.ObjectId(courseId);
   }
 
   // Build the aggregation pipeline

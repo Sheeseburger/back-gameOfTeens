@@ -70,13 +70,13 @@ exports.acceptInvite = catchAsync(async (req, res, next) => {
   const playerId = req.body.playerId;
   const marathon = req.body.marathon;
   const result = await Invitation.deleteMany({
-    player: mongoose.Types.ObjectId(playerId),
-    marathon: mongoose.Types.ObjectId(marathon)
+    player: new mongoose.Types.ObjectId(playerId),
+    marathon: new mongoose.Types.ObjectId(marathon)
   });
   console.log(result);
   console.log({
-    player: mongoose.Types.ObjectId(playerId),
-    marathon: mongoose.Types.ObjectId(marathon)
+    player: new mongoose.Types.ObjectId(playerId),
+    marathon: new mongoose.Types.ObjectId(marathon)
   });
   const team = await Team.findById(teamId);
   team.members.push(playerId);
