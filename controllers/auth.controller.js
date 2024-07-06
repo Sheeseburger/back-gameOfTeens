@@ -19,6 +19,7 @@ const signToken = user => {
       id: user._id,
       name: user.name,
       roleName: user.role,
+      register: user.createdAt,
       role: user.role === 'admin' ? 1 : user.role === 'jury' ? 0 : user.role === 'player' ? 2 : 3,
       subscribedTo: user.role === 'player' ? user.subscribedTo : null
     },
@@ -47,8 +48,8 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide email and/or password'), 400);
   }
 
-  const user = await User.findOne({email}).select('+password');
-
+  const user = await User.findOne({email}).select('+password').select('+createdAt +updatedAt');
+  console.log(user);
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password'), 401);
   }

@@ -3,35 +3,38 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 //name, email, photo, password, passwordConfirm
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'We need your name :3']
-  },
-  email: {
-    type: String,
-    required: [true, 'We need your email ;3'],
-    unique: true,
-    validate: [validator.isEmail, 'Email is not correct']
-  },
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'We need your name :3']
+    },
+    email: {
+      type: String,
+      required: [true, 'We need your email ;3'],
+      unique: true,
+      validate: [validator.isEmail, 'Email is not correct']
+    },
 
-  role: {
-    type: String,
-    enum: ['admin', 'jury', 'player', 'mentor'],
-    default: 'jury'
-  },
-  subscribedTo: [{type: mongoose.Schema.Types.ObjectId, ref: 'Marathon'}],
-  password: {
-    type: String,
-    required: true,
-    minlength: 3,
-    select: false
-  },
+    role: {
+      type: String,
+      enum: ['admin', 'jury', 'player', 'mentor'],
+      default: 'jury'
+    },
+    subscribedTo: [{type: mongoose.Schema.Types.ObjectId, ref: 'Marathon'}],
+    password: {
+      type: String,
+      required: true,
+      minlength: 3,
+      select: false
+    },
 
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date
-});
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date
+  },
+  {timestamps: true}
+);
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;

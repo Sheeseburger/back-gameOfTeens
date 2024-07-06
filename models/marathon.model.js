@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 
-const BlockProjectSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: false
+const BlockProjectSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: false
+    },
+    files: {
+      type: Array,
+      required: false
+    },
+    links: {
+      type: Array,
+      required: false
+    },
+    team: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Team',
+      required: true
+    }
   },
-  files: {
-    type: Array,
-    required: false
-  },
-  links: {
-    type: Array,
-    required: false
-  },
-  team: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Team',
-    required: true
-  }
-});
+  {timestamps: true}
+);
 
 const BlockSchema = new mongoose.Schema({
   name: {

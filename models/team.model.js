@@ -1,23 +1,26 @@
 const mongoose = require('mongoose');
 
-const TeamSchema = new mongoose.Schema({
-  leader: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  members: [
-    {
+const TeamSchema = new mongoose.Schema(
+  {
+    leader: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
+    },
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ],
+    marathon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Marathon',
+      required: true
     }
-  ],
-  marathon: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Marathon',
-    required: true
-  }
-});
+  },
+  {timestamps: true}
+);
 function autoPopulateUsers(next) {
   this.populate('leader members');
   next();
