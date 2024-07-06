@@ -44,7 +44,7 @@ exports.getAllProjects = catchAsync(async (req, res, next) => {
     let query = Project.find();
     // Build the match stage for non-admin users
     query = factory.multiplePopulate(query, [{path: 'course'}, {path: 'criterias'}]);
-    if (course) query = query.where('course').equals(mongoose.Types.ObjectId(course));
+    if (course) query = query.where('course').equals(new mongoose.Types.ObjectId(course));
     query = query.where('jures').elemMatch({
       jureId: req.user._id,
       confirmed: false
@@ -119,7 +119,7 @@ exports.addJureToProject = async (req, res) => {
 
     // Add the new jure to the project
     project.jures.push({
-      jureId: mongoose.Types.ObjectId(jureId),
+      jureId: new mongoose.Types.ObjectId(jureId),
       comment: '', // Optionally add a default comment
       confirmed: false,
       scores: scores
