@@ -18,5 +18,6 @@ router
   .delete(teamController.declineInvite);
 
 router.delete('/:id/remove-player', teamController.removePlayer);
+router.delete('/:id/leave-team', teamController.removePlayer);
 
 module.exports = router;

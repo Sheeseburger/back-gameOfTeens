@@ -45,11 +45,12 @@ exports.getAllInvites = catchAsync(async (req, res, next) => {
 });
 
 exports.removePlayer = catchAsync(async (req, res, next) => {
-  const teamId = req.params.teamId;
+  const teamId = req.params.id;
   const playerId = req.body.playerId;
 
   const team = await Team.findById(teamId);
-  team.members = team.members.filter(member => member.toString() !== playerId);
+  team.members = team.members.filter(member => member._id.toString() !== playerId);
+  console.log(team.members);
 
   await team.save();
 
@@ -57,12 +58,12 @@ exports.removePlayer = catchAsync(async (req, res, next) => {
 });
 
 exports.destroyTeam = catchAsync(async (req, res, next) => {
-  const teamId = req.params.teamId;
+  const teamId = req.params.id;
   const team = await Team.findById(teamId);
-  if (team.leader !== req.user._id) {
-    return res.status(401).json({message: 'Only leader can destroy team'});
+  if (team.leader._id.toString() !== req.user._id.toString()) {
+    return res.status(400).json({message: 'Only leader can destroy team'});
   }
-  await team.remove();
+  await Team.deleteOne({_id: teamId});
   res.status(200).json({message: 'Team deleted successfully.'});
 });
 exports.acceptInvite = catchAsync(async (req, res, next) => {
