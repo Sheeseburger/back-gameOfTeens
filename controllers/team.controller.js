@@ -18,9 +18,9 @@ exports.invitePlayer = catchAsync(async (req, res, next) => {
   const teamId = req.params.id;
   const playerId = req.body.playerId;
   const marathonId = req.body.marathonId;
-  const playerAsLeader = await Team.findOne({leader: playerId, marathon: marathonId});
+  const playerAsLeader = await Team.findOne({members: {$in: [playerId]}, marathon: marathonId});
   if (playerAsLeader) {
-    res.status(400).json({message: 'Sorry, this player is already a team leader'});
+    return res.status(400).json({message: 'Sorry, this player is already a team member'});
   }
   const existingInvitation = await Invitation.findOne({
     team: teamId,
@@ -91,13 +91,11 @@ exports.declineInvite = catchAsync(async (req, res, next) => {
   console.log({team: teamId, player: req.user._id, _id: inviteId});
   try {
     // Пошук запрошення
-    const invitation = await Invitation.findOne({
+    const invitation = await Invitation.deleteOne({
       team: teamId,
       player: req.user._id,
       _id: inviteId
     });
-
-    await invitation.remove();
 
     res.status(200).json({message: 'Invitation declined successfully.'});
   } catch (error) {
