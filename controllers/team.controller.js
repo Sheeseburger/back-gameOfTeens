@@ -11,6 +11,10 @@ exports.createTeam = catchAsync(async (req, res, next) => {
   const team = new Team({leader, marathon, members: [leader]});
   await team.save();
 
+  const result = await Invitation.deleteMany({
+    player: new mongoose.Types.ObjectId(leader),
+    marathon: new mongoose.Types.ObjectId(marathon)
+  });
   res.status(201).json({message: 'Team created successfully.', team});
 });
 
