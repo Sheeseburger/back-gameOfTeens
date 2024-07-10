@@ -13,12 +13,11 @@ router.route('/myInvites/:marathonId').get(userController.myInvites);
 router.get('/:id', userController.getUserById);
 
 router.route('/').post(userController.createUser);
-
-router.route('/:id').delete(userController.deleteUser);
-
 router
   .route('/:id/subscribe/:marathonId')
   .post(userController.subscribeUserToMarathon)
   .delete(userController.unSubscribeUserToMarathon);
+
+router.route('/:id').delete(userController.deleteUser).patch(userController.updateUser);
 
 module.exports = router;

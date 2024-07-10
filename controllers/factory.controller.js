@@ -54,7 +54,7 @@ exports.createOne = Model =>
 
 exports.getOne = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id).select('-__v');
+    let query = Model.findById(req.params.id).select('-_v -password');
     if (populateOptions) query = this.multiplePopulate(query, populateOptions);
     const document = await query;
     if (!document) {
