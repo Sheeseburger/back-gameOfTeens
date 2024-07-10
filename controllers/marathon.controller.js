@@ -29,18 +29,21 @@ exports.addBlockToMarathon = async (req, res, next) => {
 
   res.status(201).json({message: 'Block added to marathon successfully.', marathon});
 };
-exports.getMarathonById = factory.getOne(Marathon);
+exports.getMarathonById = factory.getOne(Marathon, [{path: 'course'}]);
 
 exports.deleteMarathon = factory.deleteOne(Marathon);
 
 exports.getProjectsFromBlock = catchAsync(async (req, res) => {
   const marathonId = req.params.id;
   const {blockId} = req.params;
-  const marathon = await Marathon.findById(marathonId).populate('course');
+  const marathon = await Marathon.findById(marathonId).populate(
+    'course blocks.projects blocks.projects.team'
+  );
   const block = marathon.blocks.id(blockId);
   if (!block) {
     return res.status(404).json({error: 'Block not found'});
   }
+  block.projects.sort((a, b) => b.confirm - a.confirm);
 
   res.status(200).json(block.projects);
 });
@@ -126,4 +129,75 @@ exports.getProjectFromBlockByTeamId = catchAsync(async (req, res) => {
   }
 
   res.status(200).json(project);
+});
+
+exports.confirmProjectFromBlock = catchAsync(async (req, res) => {
+  const marathonId = req.params.id;
+  const {blockId, projectId} = req.params;
+
+  const marathon = await Marathon.findById(marathonId).populate('course');
+
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.id(projectId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+  project.confirm = true;
+  await marathon.save();
+
+  res.status(200).json(project);
+});
+
+exports.sendMessage = catchAsync(async (req, res) => {
+  const {marathonId, blockId, projectId} = req.params;
+  const {text, sender} = req.body;
+
+  const marathon = await Marathon.findById(marathonId);
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.id(projectId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+
+  const newMessage = {text, sender};
+  project.chat.push(newMessage);
+  await marathon.save();
+
+  res.status(201).json(newMessage);
+});
+
+// Получение всех сообщений
+exports.getAllMessages = catchAsync(async (req, res) => {
+  const {marathonId, blockId, projectId} = req.params;
+
+  const marathon = await Marathon.findById(marathonId).populate({
+    path: 'blocks.projects.chat.sender',
+    select: '-password'
+  });
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  const project = block.projects.id(projectId);
+
+  if (!project) {
+    return res.status(404).json({error: 'Project not found'});
+  }
+
+  const messages = project.chat;
+  res.status(200).json(messages);
 });

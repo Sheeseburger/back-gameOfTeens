@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+const MessageSchema = new mongoose.Schema(
+  {
+    text: {
+      type: String,
+      required: true
+    },
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    read: {
+      type: Boolean,
+      default: false
+    }
+  },
+  {timestamps: true}
+);
+
 const BlockProjectSchema = new mongoose.Schema(
   {
     name: {
@@ -14,11 +33,13 @@ const BlockProjectSchema = new mongoose.Schema(
       type: Array,
       required: false
     },
+    confirm: {type: Boolean, default: false},
     team: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Team',
       required: true
-    }
+    },
+    chat: [MessageSchema]
   },
   {timestamps: true}
 );

@@ -21,7 +21,7 @@ const signToken = user => {
       roleName: user.role,
       register: user.createdAt,
       role: user.role === 'admin' ? 1 : user.role === 'jury' ? 0 : user.role === 'player' ? 2 : 3,
-      subscribedTo: user.role === 'player' ? user.subscribedTo : null
+      subscribedTo: ['player', 'mentor'].includes(user.role) ? user.subscribedTo : null
     },
     process.env.JWT_SECRET
   );

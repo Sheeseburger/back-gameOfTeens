@@ -15,10 +15,19 @@ router
   .get(marathonController.getProjectFromBlockByTeamId);
 
 router
+  .route('/:marathonId/block/:blockId/projects/:projectId/messages')
+  .get(marathonController.getAllMessages)
+  .post(marathonController.sendMessage);
+
+router
   .route('/:id/block/:blockId/projects/:projectId')
   .get(marathonController.getProjectFromBlockById)
+  .post(marathonController.confirmProjectFromBlock)
   .patch(marathonController.updateBlockProject);
-router.route('/:id/block/:blockId/projects').post(marathonController.createProjectToBlock);
+router
+  .route('/:id/block/:blockId/projects')
+  .post(marathonController.createProjectToBlock)
+  .get(marathonController.getProjectsFromBlock);
 
 router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
 router.use(authController.allowedTo(['admin', 'mentor']));
