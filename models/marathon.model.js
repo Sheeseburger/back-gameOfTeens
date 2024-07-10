@@ -39,6 +39,10 @@ const BlockProjectSchema = new mongoose.Schema(
       ref: 'Team',
       required: true
     },
+    checkedByMentor: {
+      type: Boolean,
+      default: false
+    },
     chat: [MessageSchema]
   },
   {timestamps: true}
