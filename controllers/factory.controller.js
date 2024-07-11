@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const User = require('../models/user.model');
-const mentorHour = require('../models/mentor-hour.model');
+const news = require('../models/news.model');
 
 exports.multiplePopulate = (query, populateOptions) => {
   if (Array.isArray(populateOptions)) {
@@ -88,9 +88,9 @@ exports.getAll = (Model, populateOptions, customCondition) =>
       if (Model === User) query.where('subscribedTo').in([new mongoose.Types.ObjectId(marathonId)]);
       else query = query.where('marathon').equals(new mongoose.Types.ObjectId(marathonId));
     }
-    if (Model === mentorHour) {
-      query = query.where('marathon').in(req.user.subscribedTo);
-    }
+    // if (Model === news) {
+    //   query = query.where('marathon').in(req.user.subscribedTo);
+    // }
     query = query.sort('-createdAt'); // Default sort if none provided
 
     const document = await query;

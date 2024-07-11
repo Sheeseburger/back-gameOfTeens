@@ -5,6 +5,8 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router();
 
+router.get('/create-sheet', userController.createStatistisc);
+
 router.route('/').get(userController.getAllUsers);
 
 router.use(authController.protect);

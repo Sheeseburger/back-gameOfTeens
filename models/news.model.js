@@ -1,16 +1,13 @@
 const mongoose = require('mongoose');
 
-const mentorHourSchema = new mongoose.Schema(
+const NewsSchema = new mongoose.Schema(
   {
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true
-    },
-    marathon: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Marathon'
-    },
+    marathon: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Marathon'
+      }
+    ],
     block: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Marathon.Blocks'
@@ -25,12 +22,14 @@ const mentorHourSchema = new mongoose.Schema(
     },
     link: {
       type: String,
-      required: true
-    }
+      required: false
+    },
+    type: {type: String, enum: ['mentor-hour', 'news'], default: 'news'}
   },
+
   {timestamps: true}
 );
 
-const mentorHour = mongoose.model('mentorHour', mentorHourSchema);
+const mentorHour = mongoose.model('news', NewsSchema);
 
 module.exports = mentorHour;
