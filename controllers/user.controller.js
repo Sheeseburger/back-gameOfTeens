@@ -67,6 +67,16 @@ exports.createStatistisc = async (req, res) => {
     const sheets = loginToSheet();
     const sheetId = '12nIQaMrfIOZG8m-tVOECkETbFWj0IFoww7wlo9Y-OvU';
 
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: 'Players!A1:Z',
+    });
+
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: 'AllTeams!A1:Z',
+    });
+
     // Получаем данные для заполнения листа "players"
     const users = await User.find().where('role').eq('player').populate('subscribedTo');
 
