@@ -29,7 +29,11 @@ router
   .post(marathonController.createProjectToBlock)
   .get(marathonController.getProjectsFromBlock);
 
-router.route('/:id/block/:blockId').get(marathonController.getProjectFromBlockById);
+router
+  .route('/:id/block/:blockId')
+  .get(marathonController.getProjectFromBlockById)
+  .delete(marathonController.deleteBlockFromMarathon)
+  .patch(marathonController.updateBlockInMarathon);
 router.use(authController.allowedTo(['admin', 'mentor']));
 
 router.route('/:id/block').post(marathonController.addBlockToMarathon);

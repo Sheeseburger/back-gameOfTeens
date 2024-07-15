@@ -61,7 +61,6 @@ exports.createProjectToBlock = catchAsync(async (req, res) => {
 
   block.projects.push(newProject);
   await marathon.save();
-  console.log(block.projects);
   res.status(201).json({data: block.projects[block.projects.length - 1]});
 });
 exports.updateBlockProject = catchAsync(async (req, res) => {
@@ -200,4 +199,57 @@ exports.getAllMessages = catchAsync(async (req, res) => {
 
   const messages = project.chat;
   res.status(200).json(messages);
+});
+
+exports.deleteBlockFromMarathon = catchAsync(async (req, res) => {
+  const marathonId = req.params.id;
+  const {blockId} = req.params;
+
+  const marathon = await Marathon.findById(marathonId);
+
+  if (!marathon) {
+    return res.status(404).json({error: 'Marathon not found'});
+  }
+
+  const blockIndex = marathon.blocks.findIndex(block => block._id.toString() === blockId);
+
+  if (blockIndex === -1) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  marathon.blocks.splice(blockIndex, 1);
+  await marathon.save();
+
+  res.status(200).json({message: 'Block deleted successfully'});
+});
+
+exports.updateBlockInMarathon = catchAsync(async (req, res) => {
+  const marathonId = req.params.id;
+  const {blockId} = req.params;
+  const updatedBlockData = req.body;
+
+  const marathon = await Marathon.findById(marathonId);
+
+  if (!marathon) {
+    return res.status(404).json({error: 'Marathon not found'});
+  }
+
+  const block = marathon.blocks.id(blockId);
+
+  if (!block) {
+    return res.status(404).json({error: 'Block not found'});
+  }
+
+  // Update properties of the block
+  if (updatedBlockData.name) {
+    block.name = updatedBlockData.name;
+  }
+  if (updatedBlockData.description) {
+    block.description = updatedBlockData.description;
+  }
+  // Add more properties as needed
+
+  await marathon.save();
+
+  res.status(200).json({message: 'Block updated successfully', block});
 });

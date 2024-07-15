@@ -68,6 +68,7 @@ exports.destroyTeam = catchAsync(async (req, res, next) => {
     return res.status(400).json({message: 'Only leader can destroy team'});
   }
   await Team.deleteOne({_id: teamId});
+
   res.status(200).json({message: 'Team deleted successfully.'});
 });
 exports.acceptInvite = catchAsync(async (req, res, next) => {
