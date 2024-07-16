@@ -5,7 +5,7 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router();
 router.use(authController.protect);
-
+router.get('/block-project', marathonController.formBlockProjectData);
 router.route('/').get(marathonController.getAllMarathons);
 
 router.get('/:id', marathonController.getMarathonById);

@@ -2,6 +2,8 @@ const factory = require('./factory.controller');
 
 const Marathon = require('../models/marathon.model');
 const catchAsync = require('../utils/catchAsync');
+const getBlockProjectsByWeekData = require('../utils/sheets/formBlockProjectData');
+const uploadDataToSheet = require('../utils/sheets/uploadDataToSheet');
 
 exports.getAllMarathons = factory.getAll(Marathon, [{path: 'course'}]);
 
@@ -252,4 +254,17 @@ exports.updateBlockInMarathon = catchAsync(async (req, res) => {
   await marathon.save();
 
   res.status(200).json({message: 'Block updated successfully', block});
+});
+
+exports.formBlockProjectData = catchAsync(async (req, res) => {
+  const blockIndex = req.params.index || 0;
+  const spreadsheetId = '1g9N8eGGKYAxhnC2NJiiZKxH-ydg4K86tJ2J59OPmHJw';
+  const marathons = await Marathon.find().populate('blocks.projects.team');
+
+  const sheetData = await getBlockProjectsByWeekData(marathons, blockIndex);
+  let result = null;
+  if (sheetData) {
+    result = await uploadDataToSheet(sheetData, `Week ${blockIndex + 1}`, spreadsheetId);
+  }
+  res.json({result});
 });
