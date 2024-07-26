@@ -6,6 +6,7 @@ const getBlockProjectsByWeekData = require('../utils/sheets/formBlockProjectData
 const uploadDataToSheet = require('../utils/sheets/uploadDataToSheet');
 const createSheetIfNotExists = require('../utils/sheets/createSheetIfNotExist');
 const loginToSheet = require('../utils/sheets/loginToSheet');
+const clearSheet = require('../utils/sheets/clearSheet');
 
 exports.getAllMarathons = factory.getAll(Marathon, [{path: 'course'}]);
 
@@ -259,7 +260,7 @@ exports.updateBlockInMarathon = catchAsync(async (req, res) => {
 });
 
 exports.formBlockProjectData = catchAsync(async (req, res) => {
-  const blockIndex = req.params.index || 0;
+  const blockIndex = Number(req.query.index) || 0;
   const spreadsheetId = '1g9N8eGGKYAxhnC2NJiiZKxH-ydg4K86tJ2J59OPmHJw';
   const marathons = await Marathon.find().populate('blocks.projects.team');
 
@@ -267,8 +268,8 @@ exports.formBlockProjectData = catchAsync(async (req, res) => {
   let result = null;
   if (sheetData) {
     const sheets = await loginToSheet();
-
     await createSheetIfNotExists(sheets, spreadsheetId, `Week ${blockIndex + 1}`);
+    await clearSheet(sheets, spreadsheetId, `Week ${blockIndex + 1}`);
     result = await uploadDataToSheet(sheets, sheetData, `Week ${blockIndex + 1}`, spreadsheetId);
   }
   res.json({result});
