@@ -1,9 +1,6 @@
 const createSheetIfNotExists = require('./createSheetIfNotExist');
-const loginToSheet = require('./loginToSheet');
 
-const uploadDataToSheet = async (sheetData, name, spreadsheetId) => {
-  const sheets = loginToSheet();
-
+const uploadDataToSheet = async (sheets, sheetData, name, spreadsheetId) => {
   const resource = {
     values: sheetData
   };
