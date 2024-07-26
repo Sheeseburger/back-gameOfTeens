@@ -43,6 +43,7 @@ const BlockProjectSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+
     chat: [MessageSchema]
   },
   {timestamps: true}
@@ -53,7 +54,10 @@ const BlockSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
+  isFinalWeek: {
+    type: Boolean,
+    default: false
+  },
   description: {
     type: String,
     required: false

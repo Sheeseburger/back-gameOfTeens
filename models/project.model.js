@@ -56,6 +56,11 @@ const ProjectSchema = new Schema({
     ref: 'Course',
     required: true
   },
+  marathon: {
+    type: Schema.Types.ObjectId,
+    ref: 'Marathon',
+    required: true
+  },
   criterias: [
     {
       type: Schema.Types.ObjectId,

@@ -14,7 +14,7 @@ exports.createMarathon = factory.createOne(Marathon);
 
 exports.addBlockToMarathon = async (req, res, next) => {
   const marathonId = req.params.id;
-  const {name, description} = req.body;
+  const {name, description, isFinalWeek} = req.body;
 
   if (!name) {
     return res.status(400).json({message: 'Name is required for the block.'});
@@ -26,7 +26,7 @@ exports.addBlockToMarathon = async (req, res, next) => {
     return res.status(404).json({message: 'Marathon not found.'});
   }
 
-  const newBlock = {name, description};
+  const newBlock = {name, description, isFinalWeek};
 
   marathon.blocks.push(newBlock);
 
