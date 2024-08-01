@@ -37,6 +37,10 @@ router
 router.use(authController.allowedTo(['admin', 'mentor']));
 
 router.route('/:id/block').post(marathonController.addBlockToMarathon);
-router.route('/:id').delete(marathonController.deleteMarathon);
+
+router
+  .route('/:id')
+  .delete(marathonController.deleteMarathon)
+  .patch(authController.allowedTo(['admin']), marathonController.addCriteriaOrJureToMarathon);
 router.route('/').post(marathonController.createMarathon);
 module.exports = router;

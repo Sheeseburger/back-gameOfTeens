@@ -59,7 +59,7 @@ const ProjectSchema = new Schema({
   marathon: {
     type: Schema.Types.ObjectId,
     ref: 'Marathon',
-    required: true
+    required: false
   },
   criterias: [
     {

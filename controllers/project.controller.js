@@ -9,6 +9,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const {buildAdminAggregationPipeline} = require('../utils/projectUtils');
 const fillAllProjects = require('../utils/sheets/ProjectsToSheet');
+const Marathon = require('../models/marathon.model');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
@@ -137,15 +138,19 @@ exports.addJureToProject = async (req, res) => {
 
 exports.patchJuryDecision = catchAsync(async (req, res, next) => {
   const {projectId} = req.params;
-  const {scores, comment, jureId, project_link, video_link} = req.body;
-  console.log(projectId, jureId);
-  const project = await Project.findById(projectId);
+  const {scores, comment, jureId, project_link, video_link, marathonId} = req.body;
+  const marathon = await Marathon.findById(marathonId);
+
+  if (!marathon) return next(new AppError('No marathon found', 404));
+  const block = marathon.blocks.find(block => block.isFinalWeek === true);
+
+  const project = block.projects.find(pr => pr._id.toString() === projectId);
 
   if (!project) {
     return next(new AppError('No project found with that ID', 404));
   }
   // Find the specific jury entry in the project's jures array
-  const jury = project.jures.find(j => j.jureId.toString() === jureId);
+  const jury = project.juries.find(j => j.jureId.toString() === jureId);
 
   if (!jury) {
     return next(new AppError('No jury found with that ID for the specified project', 404));
@@ -159,10 +164,10 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
 
   // Add or update the comment
   if (comment) jury.comment = comment;
-  project.project_link = project_link;
-  project.video_link = video_link;
+  // project.project_link = project_link;
+  // project.video_link = video_link;
   // Save the project with the updated jury information
-  await project.save();
+  await marathon.save();
 
   res.status(200).json({
     status: 'success',
@@ -175,25 +180,28 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
 exports.confirmJureDecision = catchAsync(async (req, res, next) => {
   const jureId = req.user._id;
 
-  const projects = req.body.projects;
+  const {projects, marathonId} = req.body;
+
+  const marathon = await Marathon.findById(marathonId);
+
+  const block = marathon.blocks.find(block => block.isFinalWeek === true);
   const newProjects = await Promise.all(
     projects.map(async projectBody => {
-      const project = await Project.findById(projectBody._id);
+      const project = block.projects.find(pr => pr._id.toString() === projectBody._id);
       if (!project) {
         throw new AppError('No project found with that ID', 404);
       }
       // Find the specific jury entry in the project's jures array
-      const jury = project.jures.find(j => j.jureId.toString() === jureId.toString());
+      const jury = project.juries.find(j => j.jureId.toString() === jureId.toString());
 
       if (!jury) {
         throw new AppError('No jury found with that ID for the specified project', 404);
       }
       jury.confirmed = true;
-      // Save the project with the updated jury information
-      await project.save();
       return project;
     })
   );
+  marathon.save();
 
   res.status(200).json({
     status: 'success',

@@ -4,6 +4,7 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/AppError');
 const User = require('../models/user.model');
 const news = require('../models/news.model');
+const Marathon = require('../models/marathon.model');
 
 exports.multiplePopulate = (query, populateOptions) => {
   if (Array.isArray(populateOptions)) {
@@ -78,12 +79,17 @@ exports.getAll = (Model, populateOptions, customCondition) =>
     }
     if (course) query = query.where('course').equals(new mongoose.Types.ObjectId(course));
 
-    const memberId = req.query.memberId;
-    const marathonId = req.query.marathonId;
+    const {memberId, marathonId, role, id} = req.query;
     if (memberId) {
       query = query.where('members').in([new mongoose.Types.ObjectId(memberId)]);
     }
+    if (role) {
+      query.where('role').eq(role);
+    }
 
+    if (id) {
+      query = query.where('_id').eq(id);
+    }
     if (marathonId) {
       if (Model === User) query.where('subscribedTo').in([new mongoose.Types.ObjectId(marathonId)]);
       else query = query.where('marathon').equals(new mongoose.Types.ObjectId(marathonId));
@@ -93,6 +99,11 @@ exports.getAll = (Model, populateOptions, customCondition) =>
     // }
     query = query.sort('-createdAt'); // Default sort if none provided
 
+    if (Model === Marathon && req.user.role === 'jury') {
+      // there is 2 cases when jury placing marks, and when admin looking on result
+      // if role admin it will show all marathons, else only needed
+      query = query.where('juries').in([req.user._id]);
+    }
     const document = await query;
     res.json({
       status: 'success',

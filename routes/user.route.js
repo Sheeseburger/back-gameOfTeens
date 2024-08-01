@@ -14,7 +14,7 @@ router.route('/myInvites/:marathonId').get(userController.myInvites);
 
 router.get('/:id', userController.getUserById);
 
-router.route('/').post(userController.createUser);
+router.route('/').post(authController.allowedTo(['admin']), userController.createUser);
 router
   .route('/:id/subscribe/:marathonId')
   .post(userController.subscribeUserToMarathon)

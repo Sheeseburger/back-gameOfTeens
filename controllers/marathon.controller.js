@@ -8,7 +8,12 @@ const createSheetIfNotExists = require('../utils/sheets/createSheetIfNotExist');
 const loginToSheet = require('../utils/sheets/loginToSheet');
 const clearSheet = require('../utils/sheets/clearSheet');
 
-exports.getAllMarathons = factory.getAll(Marathon, [{path: 'course'}]);
+exports.getAllMarathons = factory.getAll(Marathon, [
+  {path: 'course'},
+  {path: 'criterias'},
+  {path: 'juries'},
+  {path: 'blocks.projects.team'}
+]);
 
 exports.createMarathon = factory.createOne(Marathon);
 
@@ -273,4 +278,69 @@ exports.formBlockProjectData = catchAsync(async (req, res) => {
     result = await uploadDataToSheet(sheets, sheetData, `Week ${blockIndex + 1}`, spreadsheetId);
   }
   res.json({result});
+});
+
+exports.addCriteriaOrJureToMarathon = catchAsync(async (req, res) => {
+  const {criteriaId, jureId} = req.body;
+  const {id} = req.params;
+
+  const marathon = await Marathon.findById(id);
+
+  if (!marathon) {
+    return res.status(404).json({message: 'Marathon not found'});
+  }
+
+  if (criteriaId) {
+    marathon.criterias.push(criteriaId);
+    await marathon.save();
+    return res.status(200).json({message: 'Criteria added successfully', marathon});
+  }
+
+  if (jureId) {
+    marathon.juries.push(jureId);
+    await marathon.save();
+    return res.status(200).json({message: 'Jure added successfully', marathon});
+  }
+
+  res.status(400).json({message: 'No criteriaId or jureId provided'});
+});
+
+exports.createJureSchema = catchAsync(async (req, res) => {
+  const {projectId, marathonId} = req.body;
+  const userId = req.user._id;
+  const marathon = await Marathon.findById(marathonId);
+
+  if (!marathon) {
+    return res.status(404).json({message: 'Marathon not found'});
+  }
+
+  const block = marathon.blocks.find(block => block.isFinalWeek === true);
+
+  if (!block) {
+    return res.status(404).json({message: 'Project not found in any block'});
+  }
+
+  const project = block.projects.find(project => project._id.toString() === projectId);
+
+  const existingJure = project.juries.find(jure => jure.jureId.toString() === userId.toString());
+
+  if (existingJure) {
+    return res.status(400).json({message: 'Jury already exists for this user in the project'});
+  }
+
+  const newJure = {
+    jureId: userId,
+    comment: '',
+    confirmed: false,
+    scores: marathon.criterias.map(criteria => {
+      return {criteria: criteria._id, score: 0};
+    })
+  };
+
+  project.juries.push(newJure);
+
+  // Сохраняем изменения
+  await marathon.save();
+
+  res.status(200).json({message: 'Jury added successfully', newJure});
 });
