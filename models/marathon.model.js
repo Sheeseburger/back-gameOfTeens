@@ -50,7 +50,14 @@ const MessageSchema = new mongoose.Schema(
   },
   {timestamps: true}
 );
-
+const FinalVideoSchema = new mongoose.Schema({
+  link: {type: String, required: true},
+  description: {type: String, required: true}
+});
+const MentorCommentSchema = new mongoose.Schema({
+  text: {type: String, required: true},
+  author: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}
+});
 const BlockProjectSchema = new mongoose.Schema(
   {
     name: {
@@ -65,6 +72,7 @@ const BlockProjectSchema = new mongoose.Schema(
       type: Array,
       required: false
     },
+    finalProject: {},
     confirm: {type: Boolean, default: false},
     team: {
       type: mongoose.Schema.Types.ObjectId,
@@ -75,7 +83,8 @@ const BlockProjectSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-
+    mentorComment: MentorCommentSchema,
+    finalVideo: FinalVideoSchema,
     chat: [MessageSchema],
     juries: [JureSchema]
   },
