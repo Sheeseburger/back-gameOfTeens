@@ -10,6 +10,8 @@ const AppError = require('../utils/AppError');
 const {buildAdminAggregationPipeline} = require('../utils/projectUtils');
 const fillAllProjects = require('../utils/sheets/ProjectsToSheet');
 const Marathon = require('../models/marathon.model');
+const clearSheet = require('../utils/sheets/clearSheet');
+const uploadDataToSheet = require('../utils/sheets/uploadDataToSheet');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
@@ -212,19 +214,26 @@ exports.confirmJureDecision = catchAsync(async (req, res, next) => {
 });
 exports.AllProjectsToSheet = async (req, res, next) => {
   const sheets = loginToSheet();
-  const spreadsheetId = process.env.SPREADSHEETID;
-
-  const projects = await Project.find().populate('course');
-  const data = fillAllProjects(projects);
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: 'Projects!A1',
-    valueInputOption: 'RAW',
-    resource: {
-      values: data
-    }
+  const spreadsheetId = '1Of-pKkxzuDGeeNR431Nm452lYOuiF0CSsvF7ZU0FEE0';
+  const marathons = await Marathon.find().populate('blocks.projects.team');
+  const rows = [["Ім'я лідера", 'кількість участників', 'Перелік участників']];
+  marathons.map(marathon => {
+    const finalBlock = marathon.blocks.find(block => block.isFinalWeek === true);
+    if (!finalBlock) return;
+    rows.push(['', marathon.name, '']);
+    const projects = finalBlock.projects;
+    projects.map(project =>
+      rows.push([
+        `${project.team.leader.name} (${project.team.leader.email})`,
+        project.team.members.length,
+        project.team.members.map(member => `${member.name} (${member.email})`).join(', ')
+      ])
+    );
   });
-  res.json({message: 'filled'});
+  const sheetName = 'All marathons';
+  await clearSheet(sheets, spreadsheetId, sheetName);
+  result = await uploadDataToSheet(sheets, rows, sheetName, spreadsheetId);
+  res.json(result);
 };
 
 exports.fillSpreadsheet = async (req, res, next) => {
