@@ -313,9 +313,11 @@ exports.createJureSchema = catchAsync(async (req, res) => {
   if (!marathon) {
     return res.status(404).json({message: 'Marathon not found'});
   }
+  const blockLength = marathon.blocks.length;
 
-  const block = marathon.blocks.find(block => block.isFinalWeek === true);
-
+  const block = marathon.blocks[blockLength - 1].isFinalWeek
+    ? marathon.blocks[blockLength - 1]
+    : null;
   if (!block) {
     return res.status(404).json({message: 'Project not found in any block'});
   }

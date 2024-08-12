@@ -12,14 +12,18 @@ const getBlockProjectsByWeekData = async (marathons, blockIndex) => {
       if (marathon.blocks && marathon.blocks[blockIndex]) {
         const block = marathon.blocks[blockIndex];
 
+        const header = [];
         // Добавление заголовка структуры данных
-        sheetData.push(['Team', 'Files', 'Links', 'Confirmed', 'CreatedAt', 'TeamMembers']);
+        header.push('Team', 'Files', 'Links');
 
-        // Проход по каждому проекту в указанном блоке
+        if (block.isFinalWeek) header.push('Video link', 'Video Description', 'Mentor Comment');
+
+        header.push('Confirmed', 'CreatedAt', 'TeamMembers');
+        sheetData.push(header);
         block.projects.forEach(project => {
           console.log(project);
           const teamName = project.team?.leader
-            ? `${project.team.leader.name} (${project.team.leader.email})`
+            ? `${project.team.leader.name} (${project.team.leader.email}) (${project.team.members.length})`
             : 'No Team';
           const teamMembers =
             project.team && project.team.members
@@ -31,7 +35,16 @@ const getBlockProjectsByWeekData = async (marathons, blockIndex) => {
           const createdAt = project.createdAt;
 
           // Формирование данных для таблицы
-          sheetData.push([teamName, files, links, confirmed, createdAt, teamMembers]);
+          const row = [];
+          row.push(teamName, files, links);
+          if (block.isFinalWeek) {
+            const videoLink = project?.finalVideo?.link;
+            const videoDesc = project?.finalVideo?.description;
+            const mentorComment = project?.mentorComment?.text;
+            row.push(videoLink, videoDesc, mentorComment);
+          }
+          row.push(confirmed, createdAt, teamMembers);
+          sheetData.push(row);
         });
       }
     });

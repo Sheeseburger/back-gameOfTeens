@@ -144,7 +144,11 @@ exports.patchJuryDecision = catchAsync(async (req, res, next) => {
   const marathon = await Marathon.findById(marathonId);
 
   if (!marathon) return next(new AppError('No marathon found', 404));
-  const block = marathon.blocks.find(block => block.isFinalWeek === true);
+  const blockLength = marathon.blocks.length;
+
+  const block = marathon.blocks[blockLength - 1].isFinalWeek
+    ? marathon.blocks[blockLength - 1]
+    : null;
 
   const project = block.projects.find(pr => pr._id.toString() === projectId);
 
@@ -186,7 +190,11 @@ exports.confirmJureDecision = catchAsync(async (req, res, next) => {
 
   const marathon = await Marathon.findById(marathonId);
 
-  const block = marathon.blocks.find(block => block.isFinalWeek === true);
+  const blockLength = marathon.blocks.length;
+
+  const block = marathon.blocks[blockLength - 1].isFinalWeek
+    ? marathon.blocks[blockLength - 1]
+    : null;
   const newProjects = await Promise.all(
     projects.map(async projectBody => {
       const project = block.projects.find(pr => pr._id.toString() === projectBody._id);
@@ -218,7 +226,11 @@ exports.AllProjectsToSheet = async (req, res, next) => {
   const marathons = await Marathon.find().populate('blocks.projects.team');
   const rows = [["Ім'я лідера", 'кількість участників', 'Перелік участників']];
   marathons.map(marathon => {
-    const finalBlock = marathon.blocks.find(block => block.isFinalWeek === true);
+    const blockLength = marathon.blocks.length;
+
+    const finalBlock = marathon.blocks[blockLength - 1].isFinalWeek
+      ? marathon.blocks[blockLength - 1]
+      : null;
     if (!finalBlock) return;
     rows.push(['', marathon.name, '']);
     const projects = finalBlock.projects;
