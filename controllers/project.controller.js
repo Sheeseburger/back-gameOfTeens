@@ -12,6 +12,8 @@ const fillAllProjects = require('../utils/sheets/ProjectsToSheet');
 const Marathon = require('../models/marathon.model');
 const clearSheet = require('../utils/sheets/clearSheet');
 const uploadDataToSheet = require('../utils/sheets/uploadDataToSheet');
+const uploadDataToGoogleSheet = require('../../../StudyBooking-back/utils/spreadsheet/uploadData');
+const createSheetIfNotExists = require('../utils/sheets/createSheetIfNotExist');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
@@ -250,57 +252,88 @@ exports.AllProjectsToSheet = async (req, res, next) => {
 
 exports.fillSpreadsheet = async (req, res, next) => {
   const sheets = loginToSheet();
-  const spreadsheetId = process.env.SPREADSHEETID;
+  const spreadsheetId = '19NCwc0ubkpdopz368N2uGvEP_-T1bdJ54b9mns-kwU4';
+  const marathons = await Marathon.find({_id: {$ne: '66a3797760c07f91e58eaaad'}})
+    .select(
+      '-description -blocks.description -blocks.projects.finalVideo -blocks.projects.files -blocks.projects.links'
+    )
+    .populate('criterias juries blocks.projects.team')
+    .lean();
 
-  const projects = await Project.find()
-    .populate('course')
-    .populate('criterias')
-    .populate({
-      path: 'jures',
-      populate: {
-        path: 'scores.criteria'
-      }
+  const filteredMarathons = marathons.map(marathon => ({
+    ...marathon,
+    // in future change to isFinalWeek (for now its last block because we have 2 isFinalWeek in row)
+    blocks: marathon.blocks[marathon.blocks.length - 1]
+  }));
+
+  // Initialize the spreadsheet rows
+
+  // Iterate over each marathon
+  filteredMarathons.forEach(async marathon => {
+    // Initialize the header row with criterias and juries
+    const spreadsheetData = [];
+    const headerRow1 = [
+      'Team Name (Leader Name)',
+      'Кількість людей у команді',
+      'Команда',
+      ...marathon.criterias.flatMap(c => [
+        c.name,
+        ...Array(marathon.juries.length - 1).fill(''),
+        ...['Avg']
+      ])
+    ];
+    const headerRow2 = ['', '', ''];
+    headerRow1.push('Total', 'Comments');
+    marathon.criterias.forEach(() => {
+      marathon.juries.forEach(jury => headerRow2.push(jury.name));
+      headerRow2.push(' ');
     });
+    headerRow2.push(' ');
+    marathon.juries.forEach(jury => headerRow2.push(jury.name));
 
-  const scratchProjects = projects.filter(project => project.course.name === 'Scratch');
-  const minecraftKidsProjects = projects.filter(
-    project => project.course.name === 'Minecraft kids'
-  );
-  const minecraftJuniorProjects = projects.filter(
-    project => project.course.name === 'Minecraft junior'
-  );
+    spreadsheetData.push(headerRow1);
+    spreadsheetData.push(headerRow2);
+    const comments = [];
+    // Iterate over each project in the final week block
 
-  const scratchData = createSheetData(scratchProjects);
-  const minecraftKidsData = createSheetData(minecraftKidsProjects);
-  const minecraftJuniorData = createSheetData(minecraftJuniorProjects);
+    marathon.blocks.projects.forEach(project => {
+      const row = [
+        `${project.team.leader.name} (${project.team.leader.email})`,
+        project.team.members.length,
+        project.team.members.map(member => `${member.name} (${member.email})`).join(', ')
+      ];
+      let total = 0;
+      // Create an array of scores for each jury member
+      marathon.criterias.forEach((criteria, index) => {
+        let avg = 0;
+        marathon.juries.forEach(jury => {
+          const jureSchema = project.juries.find(j => j.jureId.toString() === jury._id.toString());
+          const scores = jureSchema.scores.find(
+            sc => sc.criteria.toString() === criteria._id.toString()
+          );
+          if (index === 0) {
+            comments.push(jureSchema.comment);
+          }
+          row.push(scores.score ?? '-');
+          avg += scores.score;
+        });
+        total += avg / (marathon.juries.length - 1);
+        row.push(avg / (marathon.juries.length - 1));
+      });
 
-  // Обновляем данные в таблице
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: 'Scratch!A1',
-    valueInputOption: 'RAW',
-    resource: {
-      values: scratchData
-    }
+      // Add the total and comments for each jury member
+
+      row.push(total);
+      row.push(...comments);
+      // Add the row to the spreadsheet data
+      spreadsheetData.push(row);
+    });
+    const name = marathon.name;
+    await createSheetIfNotExists(sheets, spreadsheetId, name);
+
+    await clearSheet(sheets, spreadsheetId, name);
+    await uploadDataToGoogleSheet(sheets, spreadsheetId, name, spreadsheetData);
   });
 
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: 'Minecraft kids!A1',
-    valueInputOption: 'RAW',
-    resource: {
-      values: minecraftKidsData
-    }
-  });
-
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: 'Minecraft junior!A1',
-    valueInputOption: 'RAW',
-    resource: {
-      values: minecraftJuniorData
-    }
-  });
-
-  res.send('Data successfully exported to Google Sheets');
+  res.json(filteredMarathons);
 };
