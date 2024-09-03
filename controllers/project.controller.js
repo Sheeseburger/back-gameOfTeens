@@ -12,8 +12,8 @@ const fillAllProjects = require('../utils/sheets/ProjectsToSheet');
 const Marathon = require('../models/marathon.model');
 const clearSheet = require('../utils/sheets/clearSheet');
 const uploadDataToSheet = require('../utils/sheets/uploadDataToSheet');
-const uploadDataToGoogleSheet = require('../../../StudyBooking-back/utils/spreadsheet/uploadData');
 const createSheetIfNotExists = require('../utils/sheets/createSheetIfNotExist');
+const uploadDataToGoogleSheet = require('../utils/sheets/uploadDataToSheet');
 
 exports.getAllProjects = catchAsync(async (req, res, next) => {
   const course = req.params.courseId;
@@ -293,17 +293,18 @@ exports.fillSpreadsheet = async (req, res, next) => {
 
     spreadsheetData.push(headerRow1);
     spreadsheetData.push(headerRow2);
-    const comments = [];
+
     // Iterate over each project in the final week block
 
     marathon.blocks.projects.forEach(project => {
+      const comments = [];
       const row = [
         `${project.team.leader.name} (${project.team.leader.email})`,
         project.team.members.length,
         project.team.members.map(member => `${member.name} (${member.email})`).join(', ')
       ];
       let total = 0;
-      // Create an array of scores for each jury member
+
       marathon.criterias.forEach((criteria, index) => {
         let avg = 0;
         marathon.juries.forEach(jury => {
@@ -324,7 +325,11 @@ exports.fillSpreadsheet = async (req, res, next) => {
       // Add the total and comments for each jury member
 
       row.push(total);
-      row.push(...comments);
+      marathon.juries.forEach(jury => {
+        const jureSchema = project.juries.find(j => j.jureId.toString() === jury._id.toString());
+        row.push(jureSchema.comment && jureSchema.comment.length > 0 ? jureSchema.comment : '-');
+      });
+
       // Add the row to the spreadsheet data
       spreadsheetData.push(row);
     });
@@ -336,4 +341,15 @@ exports.fillSpreadsheet = async (req, res, next) => {
   });
 
   res.json(filteredMarathons);
+};
+
+exports.getComments = async (req, res, next) => {
+  const sheets = loginToSheet();
+  const spreadsheetId = '1wyHHH-FdeANNxyR9ZOg6l_BCZ4pZQCg0lBKMNwHzMXQ';
+  const marathon = await Marathon.find({_id: '6687dfabf12dbfd2229fe8d0'})
+    .select('-blocks.projects.juries')
+    .populate('blocks.projects.team')
+    .lean();
+  const blocks = marathon[0].blocks;
+  res.json(blocks);
 };
